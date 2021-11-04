@@ -138,14 +138,14 @@ def save_excel(dataframe_to_save, data_dir):
     return validador
 
 
-def obtem_date_time(tipo_retorno):
+def get_date_time_now(return_type):
 
     """
 
         OBTÉM TODOS OS POSSÍVEIS RETORNOS DE DATA E TEMPO.
 
         # Arguments
-            tipo_retorno                    - Required : Formato de retorno. (String)
+            return_type                    - Required : Formato de retorno. (String)
 
         # Returns
 
@@ -163,7 +163,7 @@ def obtem_date_time(tipo_retorno):
 
     try:
         ts = time.time()
-        stfim = datetime.datetime.fromtimestamp(ts).strftime(tipo_retorno)
+        stfim = datetime.datetime.fromtimestamp(ts).strftime(return_type)
 
         return stfim
     except Exception as ex:
