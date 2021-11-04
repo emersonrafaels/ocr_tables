@@ -1,8 +1,8 @@
-from extract_table import main_extract_table
+from execute_extract_table import Extract_Table
 
 files = [r"C:\Users\Emerson\Desktop\brainIAcs\MASSA_IMAGENS\CARTAS DE FATURAMENTO\Carta1.PNG"]
 
-results = main_extract_table(files)
+results = Extract_Table().main_extract_table(files)
 
 for image, tables in results:
     print("\n".join(tables))
