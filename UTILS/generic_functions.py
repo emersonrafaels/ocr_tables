@@ -16,6 +16,7 @@ __data_atualizacao__ = "04/07/2021"
 
 import datetime
 from inspect import stack
+import os
 import time
 
 import pandas as pd
@@ -44,6 +45,38 @@ def converte_int(valor_para_converter):
     except Exception as ex:
         print(ex)
         return None
+
+
+def get_split_dir(dir):
+
+    """
+
+        USADO PARA DIVIDIR O NOME DO CAMINHO EM UM PAR DE CABEÇA E CAUDA.
+        AQUI, CAUDA É O ÚLTIMO COMPONENTE DO NOME DO CAMINHO E CABEÇA É TUDO QUE LEVA A ISSO.
+
+        EX: nome do caminho = '/home/User/Desktop/file.txt'
+        CABEÇA: '/home/User/Desktop'
+        CAUDA: 'file.txt'
+
+
+        # Arguments
+            dir                 - Required : Caminho a ser splitado (String)
+
+        # Returns
+            directory           - Required : Cabeça do diretório (String)
+            filename            - Required : Cauda do diretório (String)
+
+    """
+
+    # INICIANDO AS VARIÁVEIS A SEREM OBTIDAS
+    directory = filename = None
+
+    try:
+        directory, filename = os.path.split(dir)
+    except Exception as ex:
+        print(ex)
+
+    return directory, filename
 
 
 def read_csv(data_dir):

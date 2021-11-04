@@ -1,5 +1,10 @@
 import os
+
 import cv2
+
+from UTILS.image_read import read_image_gray
+from UTILS import generic_functions
+
 
 def find_tables(image):
 
@@ -77,19 +82,21 @@ def main_extract_table(list_result_tables):
     # PERCORRENDO CADA UMA DAS IMAGENS ENVIADAS
     for file in list_result_tables:
 
+        # INICIANDO A VARIÁVEL QUE ARMAZENARÁ OS RESULTADOS (PARA CADA TABELA OBTIDA)
+        list_result_tables = []
+
         # OBTENDO O DIRETÓRIO E O NOME DO ARQUIVO
-        directory, filename = os.path.split(file)
+        directory, filename = generic_functions.get_split_dir(file)
 
         # OBTENDO O NOME DO ARQUIVO SEM EXTENSÃO
         filename_without_extension = os.path.splitext(filename)[0]
 
         # REALIZANDO A LEITURA DA IMAGEM
         # LEITURA EM ESCALA DE CINZA
-        image = cv2.imread(file, cv2.IMREAD_GRAYSCALE)
+        image = read_image_gray(image)
 
         # OBTENDO AS TABELAS CONTIDAS NA IMAGEM
         tables = find_tables(image)
-        list_result_tables = []
 
         # CASO ENCONTROU TABELAS
         if tables:
