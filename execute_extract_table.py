@@ -1,3 +1,26 @@
+"""
+
+    SERVIÇO PARA REALIZAÇÃO DE EXTRAÇÃO DE TABELAS.
+
+    1) APLICA TÉCNICAS DE PRÉ PROCESSAMENTO [
+    PARA DISTINGUIR TABELA DO RESTANTE DA IMAGEM
+    2) ENCONTRANDO TABELAS
+    3) EXTRAÇÃO DE TABELAS
+
+    # Arguments
+        object                  - Required : Imagem para aplicação da tabela e OCR (Base64 | Path | Numpy Array)
+    # Returns
+        output_text             - Required : Textos da tabela após aplicação das
+                                             técnicas de pré processamento,
+                                             OCR e pós processamento (String)
+
+"""
+
+__version__ = "1.0"
+__author__ = """Emerson V. Rafael (EMERVIN)"""
+__data_atualizacao__ = "05/11/2021"
+
+
 import os
 
 import cv2

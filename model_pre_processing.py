@@ -99,6 +99,9 @@ class Image_Pre_Processing(object):
         # INICIANDO O VALIDADOR DA FUNÇÃO
         validator = False
 
+        # INICIANDO A VARIÁVEL DE RETORNO
+        blur = None
+
         try:
             # APLICANDO A TÉCNICA DE BLUR GAUSSIANO
             blur = cv2.GaussianBlur(img, self.blur_ksize,
@@ -109,12 +112,10 @@ class Image_Pre_Processing(object):
 
             validator = True
 
-            return validator, blur
-
         except Exception as ex:
             print("ERRO NA FUNÇÃO: {} - {}".format(stack()[0][3], ex))
 
-        return validator, img
+        return validator, blur
 
 
     def threshold_image(self, img):
@@ -155,6 +156,9 @@ class Image_Pre_Processing(object):
         # INICIANDO O VALIDADOR DA FUNÇÃO
         validator = False
 
+        # INICIANDO A VARIÁVEL DE RETORNO
+        thresh = None
+
         try:
             thresh = cv2.adaptiveThreshold(~img,
                                             self.max_color_val,
@@ -167,12 +171,10 @@ class Image_Pre_Processing(object):
 
             validator = True
 
-            return validator, thresh
-
         except Exception as ex:
             print("ERRO NA FUNÇÃO: {} - {}".format(stack()[0][3], ex))
 
-        return validator, img
+        return validator, thresh
 
 
     def preprocess_blur_threshold_img(self, img):
@@ -195,6 +197,9 @@ class Image_Pre_Processing(object):
         # INICIANDO O VALIDADOR DA FUNÇÃO
         validator = False
 
+        # INICIANDO A VARIÁVEL DE RETORNO
+        thresh = None
+
         print("OCR TABLES - INICIANDO O PRÉ PROCESSAMENTO DA IMAGEM - {}".format(get_date_time_now("%d/%m/%Y %H:%M:%S")))
 
         try:
@@ -216,6 +221,9 @@ class Image_Pre_Processing(object):
 
         # INICIANDO O VALIDADOR DA FUNÇÃO
         validator = False
+
+        # INICIANDO A VARIÁVEL DE RETORNO
+        horizontally_dilated = vertically_dilated = None
 
         print(
             "OCR TABLES - TÉCNICA DE TRANSFORMAÇÕES MORFOLÓGICAS - {}".format(get_date_time_now("%d/%m/%Y %H:%M:%S")))
@@ -244,6 +252,58 @@ class Image_Pre_Processing(object):
         return validator, horizontally_dilated, vertically_dilated
 
 
+    def get_contours(self, img_horizontal, img_vertical):
+
+        """
+
+            REALIZA A OBTENÇÃO DOS CONTORNO DE ÁREA MAIOR QUE A ÁREA MIN DEFINIDA.
+
+            O OBJETIVO É ENCONTRAR OS CONTORNOS, PARA OBTER APENAS TABELAS.
+
+            1) OBTÉM TODOS OS CONTORNOS
+            2) APLICA LIMIAR DOS PLANOS DA IMAGEM (ADAPTIVETHRESHOLD)
+
+            # Arguments
+                img                    - Required : Imagem para processamento (Array)
+
+            # Returns
+                thresh                - Required : Imagem após ambos processamentos (Array)
+
+        """
+
+        # INICIANDO O VALIDADOR DA FUNÇÃO
+        validator = False
+
+        # INICIANDO A VARIÁVEL DE RETORNO
+        bounding_rects = None
+
+        print(
+            "OCR TABLES - OBTENDO AS TABELAS - {}".format(get_date_time_now("%d/%m/%Y %H:%M:%S")))
+
+        try:
+            # OBTENDO A MÁSCARA
+            mask = img_horizontal + img_vertical
+
+            # OBTENDO OS CONTORNOS
+            contours, heirarchy = cv2.findContours(
+                mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE,
+            )
+
+            # OBTENDO OS CONTORNOS COM TAMANHO MAIOR QUE DA ÁREA MIN ESPERADA
+            contours = [c for c in contours if cv2.contourArea(c) > self.min_table_area]
+            perimeter_lengths = [cv2.arcLength(c, True) for c in contours]
+            epsilons = [0.1 * p for p in perimeter_lengths]
+            approx_polys = [cv2.approxPolyDP(c, e, True) for c, e in zip(contours, epsilons)]
+            bounding_rects = [cv2.boundingRect(a) for a in approx_polys]
+
+            validator = True
+
+        except Exception as ex:
+            print("ERRO NA FUNÇÃO: {} - {}".format(stack()[0][3], ex))
+
+        return validator, bounding_rects
+
+
     def find_tables(self, image):
 
         # REALIZANDO O PRÉ PROCESSAMENTO DA IMAGEM COM BLURRING
@@ -261,26 +321,19 @@ class Image_Pre_Processing(object):
 
             if validator:
 
-                # OBTENDO A MÁSCARA E OBTENDO OS CONTORNOS
-                mask = horizontally_dilated + vertically_dilated
-                contours, heirarchy = cv2.findContours(
-                    mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE,
-                )
+                validator, bounding_rects = Image_Pre_Processing.get_contours(self,
+                                                                              horizontally_dilated,
+                                                                              vertically_dilated)
 
-                # OBTENDO OS CONTORNOS COM TAMANHO MAIOR QUE DA ÁREA MIN ESPERADA
-                contours = [c for c in contours if cv2.contourArea(c) > self.min_table_area]
-                perimeter_lengths = [cv2.arcLength(c, True) for c in contours]
-                epsilons = [0.1 * p for p in perimeter_lengths]
-                approx_polys = [cv2.approxPolyDP(c, e, True) for c, e in zip(contours, epsilons)]
-                bounding_rects = [cv2.boundingRect(a) for a in approx_polys]
+                if validator:
 
-                # The link where a lot of this code was borrowed from recommends an
-                # additional step to check the number of "joints" inside this bounding rectangle.
-                # A table should have a lot of intersections. We might have a rectangular image
-                # here though which would only have 4 intersections, 1 at each corner.
-                # Leaving that step as a future TODO if it is ever necessary.
-                images = [image[y:y+h, x:x+w] for x, y, w, h in bounding_rects]
+                    # The link where a lot of this code was borrowed from recommends an
+                    # additional step to check the number of "joints" inside this bounding rectangle.
+                    # A table should have a lot of intersections. We might have a rectangular image
+                    # here though which would only have 4 intersections, 1 at each corner.
+                    # Leaving that step as a future TODO if it is ever necessary.
+                    images = [image[y:y+h, x:x+w] for x, y, w, h in bounding_rects]
 
-                print("FORAM ENCONTRADAS {} TABELAS".format(len(images)))
+                    print("FORAM ENCONTRADAS {} TABELAS".format(len(images)))
 
         return images
