@@ -5,11 +5,10 @@
     1. A IMAGEM É LIDA EM ESCALA DE CINZA;
     2. GAUSSIAN BLUR É EXECUTADO PARA REMOVER QUALQUER RUÍDO DISPONÍVEL;
     3. O LIMIAR ADAPTATIVO É APLICADO À IMAGEM BORRADA;
-    4. ENCONTRAMOS O CONTORNO CUJA ÁREA É MAIOR, POIS REPRESENTA O QUADRO DO DOCUMENTO;
-    5. COM O CONTORNO ENCONTRADO NA ÚLTIMA ETAPA, CRIAMOS UMA MÁSCARA COM A ÁREA REPRESENTADA PELA MOLDURA;
-    6. USANDO ESTA MÁSCARA, PODEMOS ENCONTRAR OS QUATRO CANTOS DO DOCUMENTO DE IDENTIFICAÇÃO NA IMAGEM ORIGINAL;
-    7. PORTANTO, APLICAMOS DEWARPING E TRANSFORMAMOS NOSSA PERSPECTIVA,
-    DE FORMA QUE OS QUATRO CANTOS DO DOCUMENTO SEJAM IGUAIS À IMAGEM.
+    4. APLICA-SE TRANSFORMAÇÕES MORFOLÓGICAS PARA DILATAÇÃO DA IMAGEM.
+    5. ENCONTRAMOS OS CONTORNOS CUJA ÁREA SÃO MAIORES QUE UMA MÍNIMA ÁREA DEFINIDA.
+    6. COM O CONTORNO ENCONTRADO NA ÚLTIMA ETAPA, CRIAMOS UMA MÁSCARA COM A ÁREA REPRESENTADA PELA MOLDURA;
+    7. USANDO ESTA MÁSCARA, PODEMOS ENCONTRAR OS QUATRO CANTOS DO DOCUMENTO DE IDENTIFICAÇÃO NA IMAGEM ORIGINAL;
 
     # Arguments
         object                  - Required : Imagem para aplicação do OCR (Base64 | Path | Numpy Array)
@@ -28,43 +27,47 @@ from inspect import stack
 
 import cv2
 from dynaconf import settings
-import numpy as np
 
-from UTILS.image_read import read_image_gray
 from UTILS.generic_functions import get_date_time_now
 
 
 class Image_Pre_Processing(object):
 
-    def __init__(self, blur_ksize=[17, 17], std_dev_x_direction=0,
-                 std_dev_y_direction=0, max_color_val=255,
-                 threshold_ksize=15, subtract_from_mean=-2):
+    def __init__(self,
+                 blur_ksize=settings.BLUR_KSIZE,
+                 std_dev_x_direction=settings.STD_DEV_X_DIRECTION,
+                 std_dev_y_direction=settings.STD_DEV_Y_DIRECTION,
+                 max_color_val=settings.MAX_COLOR_VAL,
+                 threshold_ksize=settings.THRESHOLD_KSIZE,
+                 subtract_from_mean=settings.SUBTRACT_FROM_MEAN,
+                 scale=settings.SCALE,
+                 min_table_area=settings.MIN_TABLE_AREA):
 
         # 1 - DEFININDO A PROPRIEDADE DE BLUR
         # (DESFOQUE DA IMAGEM COM O OBJETIVO DE REMOÇÃO DE RUÍDOS DA IMAGEM)
-        self.blur_ksize = settings.BLUR_KSIZE
+        self.blur_ksize = blur_ksize
 
         # 2 - DESVIO PADRÃO DO KERNEL AO LONGO DO EIXO X (DIREÇÃO HORIZONTAL)
-        self.std_dev_x_direction = settings.STD_DEV_X_DIRECTION
+        self.std_dev_x_direction = std_dev_x_direction
 
         # 3 - DESVIO PADRÃO DO KERNEL AO LONGO DO EIXO Y (DIREÇÃO VERTICAL)
-        self.std_dev_y_direction = settings.STD_DEV_Y_DIRECTION
+        self.std_dev_y_direction = std_dev_y_direction
 
         # 4 - DEFININDO A PROPRIEDADE DE THRESHOLD (LIMIAR)
         # VALOR DE PIXEL QUE SERÁ CONVERTIDO, CASO O PIXEL ULTRAPASSE O LIMIAR
-        self.max_color_val = settings.MAX_COLOR_VAL
+        self.max_color_val = max_color_val
 
         # 5 - TAMANHO DO KERNEL PARA THRESHOLD
-        self.threshold_ksize = settings.THRESHOLD_KSIZE
+        self.threshold_ksize = threshold_ksize
 
         # 6 - VARIÁVEL QUE REPRESENTA A CONSTANTE UTILIZADA NOS MÉTODOS (SUBTRAÍDA DA MÉDIA OU MÉDIA PONDERADA)
-        self.subtract_from_mean = settings.SUBTRACT_FROM_MEAN
+        self.subtract_from_mean = subtract_from_mean
 
         # 7 - REALIZANDO O PARÂMETRO DA ESCALA
-        self.scale = settings.SCALE
+        self.scale = scale
 
         # 8 - DEFININDO O TAMANHO MIN DE ÁREA DA TABELA
-        self.min_table_area = settings.MIN_TABLE_AREA
+        self.min_table_area = min_table_area
 
 
     def smoothing_blurring(self, img):
@@ -209,57 +212,75 @@ class Image_Pre_Processing(object):
         return validator, thresh
 
 
-    def proprocess_morfo_transformations(self, image):
+    def preprocess_morfo_transformations(self, image):
 
-        # OBTENDO O COMPRIMENTO E AMPLITUDE DA IMAGEM
-        image_width, image_height = image.shape
+        # INICIANDO O VALIDADOR DA FUNÇÃO
+        validator = False
 
-        # REALIZANDO AS OPERAÇÕES NA ESTRUTURA HORIZONTAL DA IMAGEM
-        horizontal_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (int(image_width / self.scale), 1))
-        horizontally_opened = cv2.morphologyEx(image, cv2.MORPH_OPEN, horizontal_kernel)
+        print(
+            "OCR TABLES - TÉCNICA DE TRANSFORMAÇÕES MORFOLÓGICAS - {}".format(get_date_time_now("%d/%m/%Y %H:%M:%S")))
 
-        # REALIZANDO AS OPERAÇÕES NA ESTRUTURA VERTICAL DA IMAGEM
-        vertical_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (1, int(image_height / self.scale)))
-        vertically_opened = cv2.morphologyEx(image, cv2.MORPH_OPEN, vertical_kernel)
+        try:
+            # OBTENDO O COMPRIMENTO E AMPLITUDE DA IMAGEM
+            image_width, image_height = image.shape
 
-        # REALIZANDO A OPERAÇÃO DE DILATAÇÃO
-        horizontally_dilated = cv2.dilate(horizontally_opened, cv2.getStructuringElement(cv2.MORPH_RECT, (40, 1)))
-        vertically_dilated = cv2.dilate(vertically_opened, cv2.getStructuringElement(cv2.MORPH_RECT, (1, 60)))
+            # REALIZANDO AS OPERAÇÕES NA ESTRUTURA HORIZONTAL DA IMAGEM
+            horizontal_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (int(image_width / self.scale), 1))
+            horizontally_opened = cv2.morphologyEx(image, cv2.MORPH_OPEN, horizontal_kernel)
 
-        horizontally_dilated, vertically_dilated
+            # REALIZANDO AS OPERAÇÕES NA ESTRUTURA VERTICAL DA IMAGEM
+            vertical_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (1, int(image_height / self.scale)))
+            vertically_opened = cv2.morphologyEx(image, cv2.MORPH_OPEN, vertical_kernel)
+
+            # REALIZANDO A OPERAÇÃO DE DILATAÇÃO
+            horizontally_dilated = cv2.dilate(horizontally_opened, cv2.getStructuringElement(cv2.MORPH_RECT, (40, 1)))
+            vertically_dilated = cv2.dilate(vertically_opened, cv2.getStructuringElement(cv2.MORPH_RECT, (1, 60)))
+
+            validator = True
+
+        except Exception as ex:
+            print("ERRO NA FUNÇÃO: {} - {}".format(stack()[0][3], ex))
+
+        return validator, horizontally_dilated, vertically_dilated
 
 
     def find_tables(self, image):
 
         # REALIZANDO O PRÉ PROCESSAMENTO DA IMAGEM COM BLURRING
-        validator, preproc_img_blur_thresh = Image_Pre_Processing.preprocess_blur_threshold_img(image)
+        validator, preproc_img_blur_thresh = Image_Pre_Processing.preprocess_blur_threshold_img(self,
+                                                                                                image)
 
-        # REALIZANDO A CÓPIA DA IMAGEM
-        vertical = horizontal = preproc_img_blur_thresh.copy()
+        if validator:
 
-        # APLICANDO TRANSFORMAÇÕES MORFOLÓGICAS
-        horizontally_dilated, vertically_dilated = Image_Pre_Processing.proprocess_morfo_transformations(preproc_img_blur_thresh)
+            # REALIZANDO A CÓPIA DA IMAGEM
+            vertical = horizontal = preproc_img_blur_thresh.copy()
 
-        # OBTENDO A MÁSCARA E OBTENDO OS CONTORNOS
-        mask = horizontally_dilated + vertically_dilated
-        contours, heirarchy = cv2.findContours(
-            mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE,
-        )
+            # APLICANDO TRANSFORMAÇÕES MORFOLÓGICAS
+            validator, horizontally_dilated, vertically_dilated = Image_Pre_Processing.preprocess_morfo_transformations(self,
+                                                                                                                        preproc_img_blur_thresh)
 
-        # OBTENDO OS CONTORNOS COM TAMANHO MAIOR QUE DO MIN ESPERADO
-        contours = [c for c in contours if cv2.contourArea(c) > self.min_table_area]
-        perimeter_lengths = [cv2.arcLength(c, True) for c in contours]
-        epsilons = [0.1 * p for p in perimeter_lengths]
-        approx_polys = [cv2.approxPolyDP(c, e, True) for c, e in zip(contours, epsilons)]
-        bounding_rects = [cv2.boundingRect(a) for a in approx_polys]
+            if validator:
 
-        # The link where a lot of this code was borrowed from recommends an
-        # additional step to check the number of "joints" inside this bounding rectangle.
-        # A table should have a lot of intersections. We might have a rectangular image
-        # here though which would only have 4 intersections, 1 at each corner.
-        # Leaving that step as a future TODO if it is ever necessary.
-        images = [image[y:y+h, x:x+w] for x, y, w, h in bounding_rects]
+                # OBTENDO A MÁSCARA E OBTENDO OS CONTORNOS
+                mask = horizontally_dilated + vertically_dilated
+                contours, heirarchy = cv2.findContours(
+                    mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE,
+                )
 
-        print("FORAM ENCONTRADAS {} TABELAS".format(len(images)))
+                # OBTENDO OS CONTORNOS COM TAMANHO MAIOR QUE DA ÁREA MIN ESPERADA
+                contours = [c for c in contours if cv2.contourArea(c) > self.min_table_area]
+                perimeter_lengths = [cv2.arcLength(c, True) for c in contours]
+                epsilons = [0.1 * p for p in perimeter_lengths]
+                approx_polys = [cv2.approxPolyDP(c, e, True) for c, e in zip(contours, epsilons)]
+                bounding_rects = [cv2.boundingRect(a) for a in approx_polys]
+
+                # The link where a lot of this code was borrowed from recommends an
+                # additional step to check the number of "joints" inside this bounding rectangle.
+                # A table should have a lot of intersections. We might have a rectangular image
+                # here though which would only have 4 intersections, 1 at each corner.
+                # Leaving that step as a future TODO if it is ever necessary.
+                images = [image[y:y+h, x:x+w] for x, y, w, h in bounding_rects]
+
+                print("FORAM ENCONTRADAS {} TABELAS".format(len(images)))
 
         return images
