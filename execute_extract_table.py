@@ -29,6 +29,7 @@ from dynaconf import settings
 from model_pre_processing import Image_Pre_Processing
 from UTILS.image_read import read_image_gray
 from UTILS import generic_functions
+from UTILS.image_view import image_view_functions
 
 
 class Extract_Table():
@@ -63,7 +64,7 @@ class Extract_Table():
             tables = Image_Pre_Processing().find_tables(image)
 
             # CASO ENCONTROU TABELAS
-            if tables:
+            if len(tables) > 0:
 
                 # CRIANDO O DIRETÓRIO PARA SALVAR AS TABELAS ENCONTRADAS
                 # NOVO_DIRETORIO = DIRETORIO/NOME_DO_ARQUIVO
@@ -73,7 +74,7 @@ class Extract_Table():
                 for i, table in enumerate(tables):
 
                     # DEFININDO O NOME DA TABELA A SER SALVA (FORMATO PNG)
-                    table_filename = "{}{}{}".format("table_", i, "png")
+                    table_filename = "{}{}{}".format("table_", i, ".png")
 
                     # DEFININDO O DIRETÓRIO E NOME DE SAVE
                     table_filepath = os.path.join(

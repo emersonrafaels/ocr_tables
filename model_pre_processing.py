@@ -253,6 +253,108 @@ class Image_Pre_Processing(object):
         return validator, horizontally_dilated, vertically_dilated
 
 
+    def __get_max_contour(self, img):
+
+        """
+
+            REALIZA A OBTENÇÃO DO CONTORNO DE MAIOR ÁREA DA FIGURA.
+
+            O OBJETIVO É ENCONTRAR O MÁXIMO CONTORNO, PARA OBTER APENAS O DOCUMENTO DE IDENTIIFAÇÃO,
+            RETIRANDO POSSÍVEIS OUTROS OBJETOS OU
+            CASOS NO QUAL O DOCUMENTO POSSA ESTAR SCANEADO EM UMA FOLHA SULFITE.
+
+            1) OBTÉM TODOS OS CONTORNOS
+            2) OBTÉM O CONTORNO DE MÁXIMA ÁREA.
+
+            # Arguments
+                img                - Required : Imagem para processamento (Array)
+
+            # Returns
+                roi                - Required : Área de interesse (Array)
+
+        """
+
+        # INICIANDO A VARIAVEL QUE ARMAZENARÁ O VALOR DE MÁXIMA ÁREA DE CONTORNO
+        roi = max_area = 0
+
+        # INICIANDO O VALIDADOR DA FUNÇÃO
+        validator = False
+
+        print("OCR RG - BUSCANDO O DOCUMENTO NA IMAGEM - {}".format(get_date_time_now("%d/%m/%Y %H:%M:%S")))
+
+        try:
+            # OBTENDO TODOS OS CONTORNOS
+            contours, _ = cv2.findContours(img, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
+
+            # PERCORRENDO TODOS OS CONTORNOS
+            for contour in contours:
+
+                # OBTENDO O TAMANHO DA ÁREA DO CONTORNO
+                area = cv2.contourArea(contour)
+
+                # VERIFICANDO SE O VALOR É MAIOR DO QUE ATUALMENTE É A MÁXIMA ÁREA
+                if area > max_area:
+
+                    # CASO VALOR ATUAL SEJA MAIOR QUE A MÁXIMA ÁREA, O VALOR DA MÁXIMA ÁREA É ATUALIZADO
+                    max_area = area
+
+                    # ROI ARMAZENA O CONTORNO
+                    roi = contour
+
+            validator = True
+
+        except Exception as ex:
+            print("ERRO NA FUNÇÃO: {} - {}".format(stack()[0][3], ex))
+
+        return validator, roi
+
+
+    def __crop_image_countour(self, img, contour):
+
+        """
+
+            REALIZA O CROP DA IMAGEM ORIGINAL COM BASE NO CONTORNO DE MÁXIMA ÁREA ENCONTRADO.
+
+            # Arguments
+                img                 - Required : Imagem para processamento (Array)
+                contour             - Required : Valor do contorno da imagem (Array)
+
+            # Returns
+                mask                - Required : Imagem com a máscara de contornos (Array)
+
+        """
+
+        # INICIANDO O VALIDADOR DA FUNÇÃO
+        validator = False
+
+        # INICIANDO AS VARIÁVEIS QUE ARMAZENARÃO A LISTA DE CONTORNOS NA HORIZONTAL E VERTICAL
+        x, y = [], []
+
+        print("OCR RG - CROPPANDO O DOCUMENTO NA IMAGEM - {}".format(get_date_time_now("%d/%m/%Y %H:%M:%S")))
+
+        try:
+            for contour_line in contour:
+                x.append(contour_line[0][0])
+                y.append(contour_line[0][1])
+
+            # OBTENDO OS VALORES MIN E MÁXIMO DE CADA EIXO
+            x1, x2, y1, y2 = min(x), max(x), min(y), max(y)
+
+            # APLICANDO O CROP NA IMAGEM
+            image_cropped_contour = img[y1:y2, x1:x2]
+
+            validator = True
+
+            print("OCR RG - CROP REALIZADO COM SUCESSO - {}".format(get_date_time_now("%d/%m/%Y %H:%M:%S")))
+
+            return validator, image_cropped_contour
+
+        except Exception as ex:
+            print("ERRO NA FUNÇÃO: {} - {}".format(stack()[0][3], ex))
+
+        return validator, img
+
+
     def get_contours(self, img_horizontal, img_vertical):
 
         """
@@ -322,19 +424,16 @@ class Image_Pre_Processing(object):
 
             if validator:
 
-                validator, bounding_rects = Image_Pre_Processing.get_contours(self,
-                                                                              horizontally_dilated,
-                                                                              vertically_dilated)
+                validator, contour = Image_Pre_Processing.__get_max_contour(self,
+                                                                            preproc_img_blur_thresh)
 
                 if validator:
 
-                    # The link where a lot of this code was borrowed from recommends an
-                    # additional step to check the number of "joints" inside this bounding rectangle.
-                    # A table should have a lot of intersections. We might have a rectangular image
-                    # here though which would only have 4 intersections, 1 at each corner.
-                    # Leaving that step as a future TODO if it is ever necessary.
-                    images = [image[y:y+h, x:x+w] for x, y, w, h in bounding_rects]
+                    # COM O CONTORNO ENCONTRADO A ÚLTIMA ETAPA, REALIZAMOS O CROP DA IMAGEM
+                    validator, image_cropped_contour = self.__crop_image_countour(image, contour)
 
-                    print("FORAM ENCONTRADAS {} TABELAS".format(len(images)))
+                    print("FORAM ENCONTRADAS {} TABELAS".format(len(image_cropped_contour)))
 
-        return images
+                    return image_cropped_contour
+
+        return image
