@@ -1,64 +1,54 @@
 from inspect import stack
 import re
 
+from dynaconf import settings
+
 from UTILS.image_ocr import ocr_functions
+from UTILS.extract_infos import get_matchs_strings, get_matchs_line
 
 
-def pos_processing_cnpj(text_input, pattern):
+class Execute_OCR():
 
-    # MANTENDO APENAS NÚMEROS
-    text_only_numbers = re.sub(pattern=pattern, string=text_input, repl="").strip()
+    def __init__(self):
 
-    output = "{}.{}.{}/{}-{}".format(text_only_numbers[:2],
-                                     text_only_numbers[2:5],
-                                     text_only_numbers[8:12],
-                                     text_only_numbers[12:])
-
-    return output
+        pass
 
 
-def pos_processing_faturamento(text_input):
+    def pos_processing_cnpj(text_input, pattern):
 
-    # MANTENDO APENAS NÚMEROS
-    output = [result for result in text_input.split(" ") if result != "R$" and result != "RS"]
+        # MANTENDO APENAS NÚMEROS
+        text_only_numbers = re.sub(pattern=pattern, string=text_input, repl="").strip()
 
-    return output
+        output = "{}.{}.{}/{}-{}".format(text_only_numbers[:2],
+                                         text_only_numbers[2:5],
+                                         text_only_numbers[8:12],
+                                         text_only_numbers[12:])
+
+        return output
 
 
-def get_matchs_line(text, field_pattern, filters_validate=[]):
+    def pos_processing_faturamento(text_input):
 
-    """
+        # MANTENDO APENAS NÚMEROS
+        output = [result for result in text_input.split(" ") if result != "R$" and result != "RS"]
 
-        FUNÇÃO RESPONSÁVEL POR ORQUESTRAR OS MATCHS
-        ANALISANDO LINHA A LINHA
+        return output
 
-        RECEBE O TEXTO ANALISADO: text
-        RECEBE O PATTERN: field_pattern
 
-        # Arguments
-            text                  - Required : Texto analisado (String)
-            field_pattern         - Required : Pattern a ser utilizado (Regex)
-            filters_validate      - Optional : Filtros a validações a serem aplicadas (List)
-        # Returns
-            matchs_text            - Required : Resultado do modelo com os matchs (List)
+    def orchestra_ocr(dir_image):
 
-    """
+        # INICIANDO AS VARIÁVEIS RESULTANTES
+        result_ocr = ""
+        list_result_cnpj = ""
+        json_result = []
 
-    matchs_string = []
+        # REALIZANDO O OCR SOBRE A IMAGEM
+        result_ocr = ocr_functions.Orquestra_OCR(dir_image)
 
-    try:
-        # SPLITANDO O TEXTO A CADA QUEBRA DE LINHA
-        # COM ISSO, OBTEMOS LINHA POR LINHA
-        for text_line in text.split("\n"):
+        # OBTENDO - CNPJ
+        list_result_cnpj = get_matchs_line(result_ocr, settings.PATTERN_CNPJ)
 
-            # REALIZANDO O MATCH
-            for match in re.finditer(pattern=re.compile(field_pattern, re.IGNORECASE),
-                                     string=text_line):
+        # FORMATANDO O RESULTADO OBTIDO - CNPJ
+        cnpj = [Execute_OCR.pos_processing_cnpj(value[0]) for value in list_result_cnpj]
 
-                # REALIZANDO O MATCH
-                matchs_string.append([text_line, match.start(), match.end(), match[0]])
-
-    except Exception as ex:
-        print("ERRO NA FUNÇÃO: {} - {}".format(stack()[0][3], ex))
-
-    return matchs_string
+        return result_ocr, cnpj, json_result

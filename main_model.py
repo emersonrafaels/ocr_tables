@@ -19,11 +19,29 @@ __author__ = """Emerson V. Rafael (EMERVIN)"""
 __data_atualizacao__ = "05/11/2021"
 
 
+from dynaconf import settings
+
 from execute_extract_table import Extract_Table
+from execute_ocr import Execute_OCR
 
-files = [r"C:\Users\Emerson\Desktop\brainIAcs\MASSA_IMAGENS\CARTAS DE FATURAMENTO\Carta1.PNG"]
 
-results = Extract_Table().main_extract_table(files)
+def main_model(dir_image):
 
-for image, tables in results:
-    print("\n".join(tables))
+    # INICIANDO O JSON DE RESULTADO
+    json_result = {"cnpj": "", "faturamento": ""}
+
+    for file in dir_image:
+
+        # ANALISANDO SE DEVE OCORRER EXTRAÇÃO DE TABELA
+        if settings.EXTRACT_TABLE:
+
+            # REALIZANDO A EXTRAÇÃO DA TABELA
+            results = Extract_Table().main_extract_table(file)
+
+            # OBTENDO AS TABELAS SALVAS
+            for image, tables in results:
+                print("\n".join(tables))
+
+
+        # ENVIANDO A IMAGEM COMPLETA PARA OCR
+        result_ocr = Execute_OCR().orchestra_ocr(file)

@@ -13,18 +13,16 @@
 
 __version__ = "1.0"
 __author__ = """Emerson V. Rafael (EMERVIN)"""
-__data_atualizacao__ = "28/10/2021"
-
-
-from inspect import stack
+__data_atualizacao__ = "03/07/2021"
 
 import cv2
-from dynaconf import settings
 import pytesseract
 
 from UTILS.generic_functions import converte_int
-from UTILS.image_view import image_view_functions
-from UTILS.image_convert_format import convert_image
+import UTILS.image_view as image_view_functions
+
+# CONFIGURANDO O TESSERACT
+pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
 
 
 class ocr_functions():
@@ -38,39 +36,37 @@ class ocr_functions():
         # Arguments
             imagem_atual            - Required : Imagem para aplicação do OCR (String | Object)
             lang_padrao             - Optional : Linguagem que será utilizada no OCR (String)
-            config_tesseract_psm    - Optional : Configuração do tesseract.
+            config_tesseract        - Optional : Configuração do tesseract.
                                                  É possível passar um valor
                                                  específico de PSM. (String | Integer)
-            config_tesseract_oem    - Optional : Configuração do tesseract.
-                                                 É possível passar um valor
-                                                 específico de OEM. (String | Integer)
             tipo_retorno_ocr_input  - Optional : Tipo de retorno do ocr desejado (String)
         # Returns
             texto_ocr               - Required : Texto obtido após aplicação da técnica de OCR (String)
 
     """
 
-    def __init__(self,
-                 lang_padrao=settings.TESSERACT_LANG,
-                 config_tesseract_psm=settings.TESSERACT_PSM,
-                 config_tesseract_oem=settings.TESSERACT_OEM,
-                 tipo_retorno_ocr_input=settings.TIPO_OCR):
+    def __init__(self, imagem_aplicar_ocr,
+                 lang_padrao = 'por',
+                 config_tesseract = '1',
+                 tipo_retorno_ocr_input = "TEXTO"):
 
+        # 1 - IMAGEM NO QUAL O OCR SERÁ APLICADO
+        self.imagem_atual = imagem_aplicar_ocr
 
-        # 1 - LINGUAGEM PADRÃO DO OCR
+        # 2 - LINGUAGEM PADRÃO DO OCR
         self.lang_padrao = lang_padrao
 
-        # 2 - CONFIG PSM DO TESSERACT
-        self.config_tesseract_psm = config_tesseract_psm
-
-        # 3 - CONFIG OEM DO TESSERACT
-        self.config_tesseract_oem = config_tesseract_oem
+        # 3 - CONFIG PSM DO TESSERACT
+        self.config_tesseract = config_tesseract
 
         # 4 - LISTA DE TIPOS DE RETORNO DO OCR
         self.lista_tipos_retorno_ocr = ["TEXTO", "COMPLETO"]
 
         # 5 - TIPO DE RETORNO DO OCR SELECIONADA
         self.tipo_retorno_ocr = tipo_retorno_ocr_input
+
+        # 6 - CONFIGURAÇÃO DO TESSDATA
+        self.tessdata_dir_config = r'--tessdata-dir "C:\Program Files\Tesseract-OCR\tessdata-master"'
 
 
     @staticmethod
@@ -83,6 +79,7 @@ class ocr_functions():
 
             # Arguments
                 imagem_para_conversao_rgb        - Required : Imagem para aplicação da conversão (Object)
+
             # Returns
                 validador                        - Required : Validador de execução da função (Boolean)
                 rgb                              - Required : Imagem após conversãO RGB (Object)
@@ -100,7 +97,7 @@ class ocr_functions():
             return validador, rgb
 
         except Exception as ex:
-            print("ERRO NA FUNÇÃO: {} - {}".format(stack()[0][3], ex))
+            print(ex)
             return validador, imagem_para_conversao_rgb
 
 
@@ -132,16 +129,15 @@ class ocr_functions():
 
         except Exception as ex:
             print("A LINGUAGEM SELECIONADA NÃO ESTÁ DISPONÍVEL")
-            print("ERRO NA FUNÇÃO: {} - {}".format(stack()[0][3], ex))
+            print(ex)
 
         return lista_linguagens_tesseract
 
 
     @staticmethod
-    def obtem_tesseract_psm_oem(valor_config_psm, valor_config_oem):
+    def obtem_tesseract_psm(valor_config_psm):
 
-        """
-        Modos de segmentação de página:
+        """Modos de segmentação de página:
            0 Orientação e detecção de script (OSD) apenas.
            1 Segmentação de página automática com OSD.
            2 Segmentação automática de página, mas sem OSD ou OCR.
@@ -156,41 +152,33 @@ class ocr_functions():
           11 Texto esparso. Encontre o máximo de texto possível em nenhuma ordem específica.
           12 Texto esparso com OSD.
           13 Linha bruta. Trate a imagem como uma única linha de texto,
-             contornando hacks que são específicos do Tesseract.
-        """
-
-        """
-        Modo do motor:
-            0 Legacy Engine somente
-            1 Neural Nets LSTM Engine somente
-            2 Legacy + LSTM engines
-            3 Padrão, o que estiver disponível
+                contornando hacks que são específicos do Tesseract.
         """
 
         # INICIANDO O VALIDADOR
         validador = False
 
         # INICIANDO A VARIÁVEL DE CONFIG PSM
-        valor_psm_oem_tesseract = 'tessdata'
+        valor_psm_tesseract = 'tessdata'
 
-        # CONVERTENDO OS VALORES PARA INT
+        # GARANTINDO QUE O VALOR DE CONFIGURAÇÃO DE PSM ESTÁ EM INT
+        valor_config_psm = converte_int(valor_config_psm)
 
         try:
-            # VERIFICANDO SE O VALOR DE PSM E OEM ENCONTRA-SE DENTRE AS CONFIGS
-            if converte_int(valor_config_psm) in range(14) and converte_int(valor_config_oem) in range(4):
+            # VERIFICANDO SE O VALOR DE PSM ENCONTRA-SE DENTRE AS CONFIGS
+            if valor_config_psm in range(14):
 
                 # CONVERTENDO O VALOR DO ARGUMENTO (INT) PARA
                 # FORMA ESPERADA PELO TESSERACT
 
-                valor_psm_oem_tesseract = 'tessdata --psm {} --oem {}'.format(str(valor_config_psm),
-                                                                              str(valor_config_oem))
-
+                valor_psm_tesseract = 'tessdata --psm {}'.format(str(valor_config_psm))
                 validador = True
 
         except Exception as ex:
-            print("ERRO NA FUNÇÃO: {} - {}".format(stack()[0][3], ex))
+            print("O VALOR DE CONFIG DA PSM SELECIONADA NÃO ESTÁ DISPONÍVEL")
+            print(ex)
 
-        return valor_psm_oem_tesseract
+        return valor_psm_tesseract
 
 
     def obtem_orientacao_imagem(self, caminho_imagem_atual = None):
@@ -202,6 +190,7 @@ class ocr_functions():
 
             # Arguments
                 caminho_imagem_atual        - Required : Caminho da imagem atual (String)
+
             # Returns
                 validador                   - Required : Validador de execução da função (Boolean)
                 valor_orientacao            - Required : Propriedades de orientação da imagem (String)
@@ -226,59 +215,22 @@ class ocr_functions():
         if caminho_imagem_atual is None:
             caminho_imagem_atual = self.imagem_atual
 
+        # DEVEMOS ABRIR A IMAGEM UTILIZANDO O IMAGE DO PILLOW
+        imagem_atual = image_view_functions.realiza_leitura_imagem_pillow(caminho_imagem_atual)
+
         try:
+            # OBTENDO AS INFORMAÇÕES DE ORIENTAÇÃO DA IMAGEM
+            tessdata_dir_config = self.tessdata_dir_config
 
-            # ORQUESTRANDO A LEITURA DA IMAGEM
-            imagem_atual = convert_image(caminho_imagem_atual)
-
-            valor_orientacao = pytesseract.image_to_osd(imagem_atual)
+            valor_orientacao = pytesseract.image_to_osd(imagem_atual,
+                                                        config=tessdata_dir_config)
             validador = True
 
         except Exception as ex:
             print("NÃO FOI POSSÍVEL DETECTAR A ORIENTAÇÃO DA PÁGINA")
-            print("ERRO NA FUNÇÃO: {} - {}".format(stack()[0][3], ex))
+            print(ex)
 
         return validador, valor_orientacao
-
-
-    def set_config_tesseract(self):
-
-        """
-
-            OBTÉM AS INFORMAÇÕES DA IMAGEM APÓS APLICAÇÃO DO OCR.
-            ESSA FUNÇÃO TRAZ TODAS AS INFORMAÇÕES CONTIDAS NO TEXTO ABAIXO.
-            POSIÇÕES DOS TEXTOS ENCONTRATOS, NÍVEL DE CONFIANÇA E TEXTOS.
-
-
-            # Arguments
-                imagem_rgb                  - Required : Imagem para aplicação do ocr (Object)
-            # Returns
-                validador                   - Required : Validador de execução da função (Boolean)
-                infos_ocr                   - Required : Informações obtidas no OCR (Dict)
-
-        """
-
-        # INICIANDO O VALIDADOR
-        validador = False
-
-        try:
-            # VERIFICANDO SE A LINGUAGEM SELECIONADA, ESTÁ DISPONÍVEL
-            if self.lang_padrao not in ocr_functions.tesseract_lang_disponiveis(self):
-                # COMO A LINGUAGEM SELECIONADA NÃO ESTÁ DISPONÍVEL
-                # UTILIZAREMOS A VERSÃO ENGLISH
-                self.lang_padrao = 'eng'
-
-            # VERIFICANDO A CONFIGURAÇÃO PSM - OEM
-            self.config_tesseract_psm_oem = ocr_functions.obtem_tesseract_psm_oem(self.config_tesseract_psm,
-                                                                                  self.config_tesseract_oem)
-
-
-            validador = True
-
-        except Exception as ex:
-            print("ERRO NA FUNÇÃO: {} - {}".format(stack()[0][3], ex))
-
-        return validador
 
 
     def realizar_ocr_retorno_completo(self, imagem_rgb):
@@ -292,6 +244,7 @@ class ocr_functions():
 
             # Arguments
                 imagem_rgb                  - Required : Imagem para aplicação do ocr (Object)
+
             # Returns
                 validador                   - Required : Validador de execução da função (Boolean)
                 infos_ocr                   - Required : Informações obtidas no OCR (Dict)
@@ -338,16 +291,25 @@ class ocr_functions():
         infos_ocr = {}
 
         try:
+            # VERIFICANDO SE A LINGUAGEM SELECIONADA, ESTÁ DISPONÍVEL
+            if self.lang_padrao not in ocr_functions.tesseract_lang_disponiveis(self):
+                # COMO A LINGUAGEM SELECIONADA NÃO ESTÁ DISPONÍVEL
+                # UTILIZAREMOS A VERSÃO ENGLISH
+                self.lang_padrao = 'eng'
+
+            # VERIFICANDO A CONFIGURAÇÃO PSM
+            self.config_tesseract = ocr_functions.obtem_tesseract_psm(self.config_tesseract)
+
             # REALIZANDO O OCR SOBRE A IMAGEM
             infos_ocr = pytesseract.image_to_data(imagem_rgb,
                                                   lang=self.lang_padrao,
-                                                  config=self.config_tesseract_psm,
+                                                  config=self.config_tesseract,
                                                   output_type=pytesseract.Output.DICT)
 
             validador = True
 
         except Exception as ex:
-            print("ERRO NA FUNÇÃO: {} - {}".format(stack()[0][3], ex))
+            print(ex)
 
         return validador, infos_ocr
 
@@ -360,8 +322,10 @@ class ocr_functions():
             O OCR PERMITIRÁ TRANSCREVER A IMAGEM.
             CONVERSÃO IMAGEM PARA TEXTO.
 
+
             # Arguments
                 imagem_rgb                  - Required : Imagem para aplicação do ocr (Object)
+
             # Returns
                 validador                   - Required : Validador de execução da função (Boolean)
                 texto                       - Required : Texto obtido (String)
@@ -375,15 +339,25 @@ class ocr_functions():
         texto = ""
 
         try:
+            # VERIFICANDO SE A LINGUAGEM SELECIONADA, ESTÁ DISPONÍVEL
+            if self.lang_padrao not in ocr_functions.tesseract_lang_disponiveis(self):
+
+                # COMO A LINGUAGEM SELECIONADA NÃO ESTÁ DISPONÍVEL
+                # UTILIZAREMOS A VERSÃO ENGLISH
+                self.lang_padrao = 'eng'
+
+            # VERIFICANDO A CONFIGURAÇÃO PSM
+            self.config_tesseract = ocr_functions.obtem_tesseract_psm(self.config_tesseract)
+
             # REALIZANDO O OCR SOBRE A IMAGEM
             texto = pytesseract.image_to_string(imagem_rgb,
                                                 lang=self.lang_padrao,
-                                                config=self.config_tesseract_psm)
+                                                config=self.config_tesseract)
 
             validador = True
 
         except Exception as ex:
-            print("ERRO NA FUNÇÃO: {} - {}".format(stack()[0][3], ex))
+            print(ex)
 
         return validador, texto
 
@@ -400,6 +374,7 @@ class ocr_functions():
 
             # Arguments
                 imagem_rgb                  - Required : Imagem para aplicação do ocr (Object)
+
             # Returns
                 validador                   - Required : Validador de execução da função (Boolean)
                 retorno_ocr                 - Required : Retorno do OCR (String | Dict)
@@ -413,35 +388,39 @@ class ocr_functions():
         if self.tipo_retorno_ocr == self.lista_tipos_retorno_ocr[0]:
             # O RETORNO SERÁ APENAS O TEXTUAL
             validador, retorno_ocr = ocr_functions.realizar_ocr(self, imagem_rgb)
-
         elif self.tipo_retorno_ocr == self.lista_tipos_retorno_ocr[1]:
             # O RETORNO SERÁ UM DICT CONTENDO TODAS AS INFORMAÇÕES
             validador, retorno_ocr = ocr_functions.realizar_ocr_retorno_completo(self, imagem_rgb)
-
         else:
             print("NÃO FOI INFORMADA NENHUMA OPÇÃO VÁLIDA DE RETORNO DO OCR")
 
         return validador, retorno_ocr
 
 
-    def Orquestra_OCR(self, image):
+    def Orquestra_OCR(self):
 
         # INICIANDO O VALIDADOR
         validador = False
 
         # OBTENDO A ORIENTAÇÃO DA IMAGEM
-        # validador, resultado_orientacao = ocr_functions.obtem_orientacao_imagem(self, image)
+        validador, resultado_orientacao = ocr_functions.obtem_orientacao_imagem(self, self.imagem_atual)
 
         # REALIZANDO A LEITURA DA IMAGEM
-        img_ocr = convert_image(image)
+        img_bgr = image_view_functions.realiza_leitura_imagem(self.imagem_atual)
 
-        # DEFININDO AS CONFIGURAÇÕES DO OCR - TESSERACT
-        validador = ocr_functions.set_config_tesseract(self)
+        # REALIZANDO A VISUALIZAÇÃO DA IMAGEM
+        image_view_functions.visualiza_imagem(img_bgr)
 
-        validador, retorno_ocr = ocr_functions.orquestra_tipo_leitura_ocr(self, img_ocr)
+        # REALIZANDO A CONVERSÃO DA IMAGEM EM RGB
+        validador, imagem_rgb = ocr_functions.converte_bgr_rgb(img_bgr)
 
-        if validador is False:
-            print("NÃO FOI POSSÍVEL APLICAR O OCR")
+        if validador:
+            # APLICANDO O OCR
+            validador, retorno_ocr = ocr_functions.orquestra_tipo_leitura_ocr(self, imagem_rgb)
 
-        return retorno_ocr
+            if validador:
+                return retorno_ocr
+            else:
+                print("NÃO FOI POSSÍVEL APLICAR O OCR")
+                return retorno_ocr
 

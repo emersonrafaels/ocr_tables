@@ -16,10 +16,63 @@ __data_atualizacao__ = "04/07/2021"
 
 import datetime
 from inspect import stack
-import os
+from os import path, makedirs
 import time
 
 import pandas as pd
+
+
+def verify_exists(dir):
+
+    """
+
+        FUNÇÃO PARA VERIFICAR SE UM DIRETÓRIO (PATH) EXISTE.
+
+        # Arguments
+            dir                  - Required : Diretório a ser verificado (String)
+
+        # Returns
+            validador            - Required : Validador da função (Boolean)
+
+    """
+
+    # INICIANDO O VALIDADOR DA FUNÇÃO
+    validador = False
+
+    try:
+        validador = path.exists(dir)
+    except Exception as ex:
+        print("ERRO NA FUNÇÃO {} - {]".format(stack()[0][3], ex))
+
+    return validador
+
+
+def create_path(dir):
+
+    """
+
+        FUNÇÃO PARA CRIAR UM DIRETÓRIO (PATH).
+
+        # Arguments
+            dir                  - Required : Diretório a ser criado (String)
+
+        # Returns
+            validador            - Required : Validador da função (Boolean)
+
+    """
+
+    # INICIANDO O VALIDADOR DA FUNÇÃO
+    validador = False
+
+    try:
+       # REALIZANDO A CRIAÇÃO DO DIRETÓRIO
+       makedirs(dir)
+
+       validador = True
+    except Exception as ex:
+        print("ERRO NA FUNÇÃO {} - {]".format(stack()[0][3], ex))
+
+    return validador
 
 
 def converte_int(valor_para_converter):
@@ -72,7 +125,7 @@ def get_split_dir(dir):
     directory = filename = None
 
     try:
-        directory, filename = os.path.split(dir)
+        directory, filename = path.split(dir)
     except Exception as ex:
         print(ex)
 
