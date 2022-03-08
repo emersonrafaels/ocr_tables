@@ -107,3 +107,4 @@ dmypy.json
 
 # Ignore dynaconf secret files
 .secrets.*
+LOGS/*

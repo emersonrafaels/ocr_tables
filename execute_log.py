@@ -136,17 +136,17 @@ def startLog():
     return validador
 
 
-def on_log(origin: str, msg: str, image: str, idt: str):
+def on_log(msg, origin=None, image=None, idt=None):
 
     """
 
         REALIZANDO O REGISTRO DE INÍCIO DOS LOGS
 
         # Arguments
-            origin               - Required : Origem dos logs (String)
             msg                  - Required : Mensagem do log (String)
-            image                - Required : Image atual (String)
-            idt                  - Required : Identificação da chamada (String)
+            origin               - Optional : Origem dos logs (String)
+            image                - Optional : Image atual (String)
+            idt                  - Optional : Identificação da chamada (String)
 
         # Returns
             validador            - Required : Validador da função (Boolean)
@@ -165,17 +165,18 @@ def on_log(origin: str, msg: str, image: str, idt: str):
 
 
 
-def start(origin: str, msg: str, image: str, idt: str):
+def start(msg, origin=None, image=None, idt=None, start_time=None):
 
     """
 
         REALIZANDO REGISTRO DE START
 
         # Arguments
-            origin               - Required : Origem dos logs (String)
             msg                  - Required : Mensagem do log (String)
-            image                - Required : Image atual (String)
-            idt                  - Required : Identificação da chamada (String)
+            origin               - Optional : Origem dos logs (String)
+            image                - Optional : Image atual (String)
+            idt                  - Optional : Identificação da chamada (String)
+            start_time           - Optional : Tempo de início do processamento (Float)
 
         # Returns
             validador            - Required : Validador da função (Boolean)
@@ -187,23 +188,24 @@ def start(origin: str, msg: str, image: str, idt: str):
         logger = logging.getLogger(settings.APPNAME)
 
         # REGISTRANDO O LOG - LOGGING
-        logger.error("START - {}".format(msg))
+        logger.info("START - {}".format(msg))
 
     except Exception as ex:
         print("ERRO NA FUNÇÃO {} - {]".format(stack()[0][3], ex))
 
 
-def end(origin: str, msg: str, image: str, idt: str, start_time: float):
+def end(msg, origin=None, image=None, idt=None, end_time=None):
 
     """
 
         REALIZANDO REGISTRO DE ERRO
 
         # Arguments
-            origin               - Required : Origem dos logs (String)
             msg                  - Required : Mensagem do log (String)
-            image                - Required : Image atual (String)
-            idt                  - Required : Identificação da chamada (String)
+            origin               - Optional : Origem dos logs (String)
+            image                - Optional : Image atual (String)
+            idt                  - Optional : Identificação da chamada (String)
+            end_time             - Optional : Tempo de final do processamento (Float)
 
         # Returns
             validador            - Required : Validador da função (Boolean)
@@ -221,17 +223,17 @@ def end(origin: str, msg: str, image: str, idt: str, start_time: float):
         print("ERRO NA FUNÇÃO {} - {]".format(stack()[0][3], ex))
 
 
-def error(origin: str, msg: str, image: str, idt: str):
+def error(msg, origin=None, image=None, idt=None):
 
     """
 
         REALIZANDO REGISTRO DE ERRO
 
         # Arguments
-            origin               - Required : Origem dos logs (String)
             msg                  - Required : Mensagem do log (String)
-            image                - Required : Image atual (String)
-            idt                  - Required : Identificação da chamada (String)
+            origin               - Optional : Origem dos logs (String)
+            image                - Optional : Image atual (String)
+            idt                  - Optional : Identificação da chamada (String)
 
         # Returns
             validador            - Required : Validador da função (Boolean)
@@ -249,17 +251,17 @@ def error(origin: str, msg: str, image: str, idt: str):
         print("ERRO NA FUNÇÃO {} - {]".format(stack()[0][3], ex))
 
 
-def warnings(origin: str, msg: str, image: str, idt: str):
+def warnings(msg, origin=None, image=None, idt=None):
 
     """
 
         REALIZANDO O REGISTRO DE WARNINGS
 
         # Arguments
-            origin               - Required : Origem dos logs (String)
             msg                  - Required : Mensagem do log (String)
-            image                - Required : Image atual (String)
-            idt                  - Required : Identificação da chamada (String)
+            origin               - Optional : Origem dos logs (String)
+            image                - Optional : Image atual (String)
+            idt                  - Optional : Identificação da chamada (String)
 
         # Returns
             validador            - Required : Validador da função (Boolean)
@@ -277,17 +279,17 @@ def warnings(origin: str, msg: str, image: str, idt: str):
         print("ERRO NA FUNÇÃO {} - {]".format(stack()[0][3], ex))
 
 
-def info(origin: str, msg: str, image: str, idt: str):
+def info(msg, origin=None, image=None, idt=None):
 
     """
 
         REALIZANDO REGISTRO DE INFORMAÇÕES
 
         # Arguments
-            origin               - Required : Origem dos logs (String)
             msg                  - Required : Mensagem do log (String)
-            image                - Required : Image atual (String)
-            idt                  - Required : Identificação da chamada (String)
+            origin               - Optional : Origem dos logs (String)
+            image                - Optional : Image atual (String)
+            idt                  - Optional : Identificação da chamada (String)
 
         # Returns
             validador            - Required : Validador da função (Boolean)

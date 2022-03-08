@@ -29,7 +29,7 @@ from dynaconf import settings
 from model_pre_processing import Image_Pre_Processing
 from UTILS.image_read import read_image_gray
 from UTILS import generic_functions
-from UTILS.image_view import image_view_functions
+import execute_log
 
 
 class Extract_Table():
@@ -39,57 +39,77 @@ class Extract_Table():
         pass
 
 
-    def main_extract_table(self, dir_image):
+    def main_extract_table(self, list_images):
+
+        """
+
+            ORQUESTRA A OBTENÇÃO DAS TABELAS CONTIDAS NA IMAGEM.
+
+            CASO ENCONTRE AS TABELAS, SALVA CADA UMA DAS IMAGENS
+            PERMITINDO A UTILIZAÇÃO NO MODELO DE OCR.
+
+            # Arguments
+                list_images            - Required : Lista de imagens para processamento (List)
+
+            # Returns
+                results                - Required : Resultado de modelo (List)
+
+        """
 
         # INICIANDO A VARIÁVEL QUE ARMAZENARÁ OS RESULTADOS (TABELAS ENCONTRADAS)
         results = []
 
-        # INICIANDO A VARIÁVEL QUE ARMAZENARÁ OS RESULTADOS (PARA CADA TABELA OBTIDA)
-        list_result_tables = []
+        # PERCORRENDO CADA UMA DAS IMAGENS ENVIADAS
+        for file in list_images:
 
-        # OBTENDO O DIRETÓRIO E O NOME DO ARQUIVO
-        directory, filename = generic_functions.get_split_dir(dir_image)
+            # INICIANDO A VARIÁVEL QUE ARMAZENARÁ OS RESULTADOS (PARA CADA TABELA OBTIDA)
+            list_result_tables = []
 
-        # OBTENDO O NOME DO ARQUIVO SEM EXTENSÃO
-        filename_without_extension = os.path.splitext(filename)[0]
+            # OBTENDO O DIRETÓRIO E O NOME DO ARQUIVO
+            directory, filename = generic_functions.get_split_dir(file)
 
-        # REALIZANDO A LEITURA DA IMAGEM
-        # LEITURA EM ESCALA DE CINZA
-        image = read_image_gray(dir_image)
+            # OBTENDO O NOME DO ARQUIVO SEM EXTENSÃO
+            filename_without_extension = os.path.splitext(filename)[0]
 
-        # OBTENDO AS TABELAS CONTIDAS NA IMAGEM
-        tables = Image_Pre_Processing().find_tables(image)
+            # REALIZANDO A LEITURA DA IMAGEM
+            # LEITURA EM ESCALA DE CINZA
+            image = read_image_gray(file)
 
-        # CASO ENCONTROU TABELAS
-        if len(tables) > 0:
+            # OBTENDO AS TABELAS CONTIDAS NA IMAGEM
+            tables = Image_Pre_Processing().find_tables(image)
 
-            # CRIANDO O DIRETÓRIO PARA SALVAR AS TABELAS ENCONTRADAS
-            # NOVO_DIRETORIO = DIRETORIO/NOME_DO_ARQUIVO
-            os.makedirs(os.path.join(directory, filename_without_extension), exist_ok=True)
+            # CASO ENCONTROU TABELAS
+            if len(tables) > 0:
 
-            # PERCORRENDO TODAS AS TABELAS ENCONTRADAS
-            for i, table in enumerate(tables):
+                # CRIANDO O DIRETÓRIO PARA SALVAR AS TABELAS ENCONTRADAS
+                # NOVO_DIRETORIO = DIRETORIO/NOME_DO_ARQUIVO
+                os.makedirs(os.path.join(directory,
+                                         filename_without_extension),
+                            exist_ok=True)
 
-                # DEFININDO O NOME DA TABELA A SER SALVA (FORMATO PNG)
-                table_filename = "{}{}{}".format("table_", i, ".png")
+                # PERCORRENDO TODAS AS TABELAS ENCONTRADAS
+                for idx_table, table in enumerate(tables):
 
-                # DEFININDO O DIRETÓRIO E NOME DE SAVE
-                table_filepath = os.path.join(
-                    directory, filename_without_extension, table_filename
-                )
+                    # DEFININDO O NOME DA TABELA A SER SALVA (FORMATO PNG)
+                    table_filename = "{}{}{}".format("table_", idx_table, ".png")
 
-                # SALVANDO A IMAGEM
-                cv2.imwrite(table_filepath, table)
+                    # DEFININDO O DIRETÓRIO E NOME DE SAVE
+                    table_filepath = os.path.join(
+                        directory, filename_without_extension, table_filename
+                    )
 
-                # ARMAZENANDO NA LISTA DE TABELAS SALVAS
-                # PERMITINDO USO POSTERIOR NO OCR
-                list_result_tables.append(table_filepath)
+                    # SALVANDO A IMAGEM
+                    cv2.imwrite(table_filepath, table)
 
-                # ARMAZENANDO O RESULTADO
-                # ARQUIVO DE INPUT (file)
-                # TABELAS OBTIDAS (list_result_tables)
-                results.append((dir_image, list_result_tables))
+                    # ARMAZENANDO NA LISTA DE TABELAS SALVAS
+                    # PERMITINDO USO POSTERIOR NO OCR
+                    list_result_tables.append(table_filepath)
 
-                print("TABELA - {} SALVA COM SUCESSO".format(len(table_filename)))
+                    # ARMAZENANDO O RESULTADO
+                    # ARQUIVO DE INPUT (file)
+                    # TABELAS OBTIDAS (list_result_tables)
+                    results.append((file, list_result_tables))
+
+                    execute_log.info("TABELA - {} SALVA COM SUCESSO".format(idx_table))
 
         return results

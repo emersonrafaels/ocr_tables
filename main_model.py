@@ -23,25 +23,21 @@ from dynaconf import settings
 
 from execute_extract_table import Extract_Table
 from execute_ocr import Execute_OCR
+import execute_log
 
+execute_log.startLog()
 
-def main_model(dir_image):
+def result_extract_table(files):
 
-    # INICIANDO O JSON DE RESULTADO
-    json_result = {"cnpj": "", "faturamento": ""}
+    # EXECUTANDO A PIPELINE PARA BUSCA E EXTRAÇÃO DAS TABELAS
+    results = Extract_Table().main_extract_table(files)
 
-    for file in dir_image:
+    for image, tables in results:
 
-        # ANALISANDO SE DEVE OCORRER EXTRAÇÃO DE TABELA
-        if settings.EXTRACT_TABLE:
+        # EXECUTANDO O OCR
+        Execute_OCR().execute_pipeline_ocr(tables)
 
-            # REALIZANDO A EXTRAÇÃO DA TABELA
-            results = Extract_Table().main_extract_table(file)
+# DEFININDO A IMAGEM A SER UTILIZADA
+files = [r"C:\Users\Emerson\Desktop\brainIAcs\MASSA_IMAGENS\CARTAS DE FATURAMENTO\Carta2.PNG"]
 
-            # OBTENDO AS TABELAS SALVAS
-            for image, tables in results:
-                print("\n".join(tables))
-
-
-        # ENVIANDO A IMAGEM COMPLETA PARA OCR
-        result_ocr = Execute_OCR().orchestra_ocr(file)
+result_extract_table(files)

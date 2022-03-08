@@ -13,7 +13,7 @@
     # Arguments
         object                  - Required : Imagem para aplicação do OCR (Base64 | Path | Numpy Array)
     # Returns
-        output_rg               - Required : Textos dos campos do RG após aplicação das
+        output_table            - Required : Textos dos campos da tabela após aplicação das
                                              técnicas de pré processamento,
                                              OCR e pós processamento (String)
 
@@ -30,6 +30,7 @@ from dynaconf import settings
 
 from UTILS.generic_functions import get_date_time_now
 from UTILS.image_view import image_view_functions
+import execute_log
 
 
 class Image_Pre_Processing(object):
@@ -93,6 +94,7 @@ class Image_Pre_Processing(object):
                 img                    - Required : Imagem para processamento (Array)
 
             # Returns
+                validator              - Required : Validador de execução da função (Boolean)
                 blur                   - Required : Imagem após processamento do desfoque (Array)
 
         """
@@ -106,15 +108,15 @@ class Image_Pre_Processing(object):
         try:
             # APLICANDO A TÉCNICA DE BLUR GAUSSIANO
             blur = cv2.GaussianBlur(img, self.blur_ksize,
-                                       self.std_dev_x_direction,
-                                       self.std_dev_y_direction)
+                                    self.std_dev_x_direction,
+                                    self.std_dev_y_direction)
 
-            print("OCR TABLES - TÉCNICA DE DESFOQUE GAUSSIANO APLICADO COM SUCESSO - {}".format(get_date_time_now("%d/%m/%Y %H:%M:%S")))
+            execute_log.info("OCR TABLES - TÉCNICA DE DESFOQUE GAUSSIANO APLICADO COM SUCESSO - {}".format(get_date_time_now("%d/%m/%Y %H:%M:%S")))
 
             validator = True
 
         except Exception as ex:
-            print("ERRO NA FUNÇÃO: {} - {}".format(stack()[0][3], ex))
+            execute_log.error("ERRO NA FUNÇÃO: {} - {}".format(stack()[0][3], ex))
 
         return validator, blur
 
@@ -127,8 +129,9 @@ class Image_Pre_Processing(object):
             DE PIXELS VIZINHOS POR VEZ, CALCULA T PARA
             AQUELA REGIÃO LOCAL ESPECÍFICA E, EM SEGUIDA, REALIZA A SEGMENTAÇÃO.
 
-            O SEGUNDO PARÂMETRO DA FUNÇÃO É O VALOR DO LIMITE DE SAÍDA, OU SEJA, PIXEL <= T TORNARA-SE ESSE VALOR DE PIXEL.
-                EX: SE PIXEL <= T, o PIXEL TORNA-SE BRANCO (255)
+            O SEGUNDO PARÂMETRO DA FUNÇÃO É O VALOR DO LIMITE DE SAÍDA, OU SEJA,
+            PIXEL <= T TORNARA-SE ESSE VALOR DE PIXEL.
+            EX: SE PIXEL <= T, o PIXEL TORNA-SE BRANCO (255)
 
             O TERCEIRO ARGUMENTO É O MÉTODO DE LIMIAR ADAPTATIVO. AQUI NÓS
             FORNECEMOS UM VALOR DE CV2.ADAPTIVE_THRESH_GAUSSIAN_C
@@ -150,6 +153,7 @@ class Image_Pre_Processing(object):
                 img                    - Required : Imagem para processamento (Array)
 
             # Returns
+                validator              - Required : Validador de execução da função (Boolean)
                 thresh                 - Required : Imagem após processamento do limiar (Array)
 
         """
@@ -161,19 +165,19 @@ class Image_Pre_Processing(object):
         thresh = None
 
         try:
-            thresh = cv2.adaptiveThreshold(~img,
-                                            self.max_color_val,
-                                            cv2.ADAPTIVE_THRESH_MEAN_C,
-                                            cv2.THRESH_BINARY,
-                                            self.threshold_ksize,
-                                            self.subtract_from_mean)
+            thresh = cv2.adaptiveThreshold(img,
+                                           self.max_color_val,
+                                           cv2.ADAPTIVE_THRESH_MEAN_C,
+                                           cv2.THRESH_BINARY,
+                                           self.threshold_ksize,
+                                           self.subtract_from_mean)
 
-            print("OCR TABLES - TÉCNICA DE LIMIAR ADAPTATIVO APLICADO COM SUCESSO - {}".format(get_date_time_now("%d/%m/%Y %H:%M:%S")))
+            execute_log.info("OCR TABLES - TÉCNICA DE LIMIAR ADAPTATIVO APLICADO COM SUCESSO - {}".format(get_date_time_now("%d/%m/%Y %H:%M:%S")))
 
             validator = True
 
         except Exception as ex:
-            print("ERRO NA FUNÇÃO: {} - {}".format(stack()[0][3], ex))
+            execute_log.error("ERRO NA FUNÇÃO: {} - {}".format(stack()[0][3], ex))
 
         return validator, thresh
 
@@ -188,9 +192,10 @@ class Image_Pre_Processing(object):
             2) APLICA LIMIAR DOS PLANOS DA IMAGEM (ADAPTIVETHRESHOLD)
 
             # Arguments
-                img                    - Required : Imagem para processamento (Array)
+                img                   - Required : Imagem para processamento (Array)
 
             # Returns
+                validator             - Required : Validador de execução da função (Boolean)
                 thresh                - Required : Imagem após ambos processamentos (Array)
 
         """
@@ -201,7 +206,7 @@ class Image_Pre_Processing(object):
         # INICIANDO A VARIÁVEL DE RETORNO
         thresh = None
 
-        print("OCR TABLES - INICIANDO O PRÉ PROCESSAMENTO DA IMAGEM - {}".format(get_date_time_now("%d/%m/%Y %H:%M:%S")))
+        execute_log.info("OCR TABLES - INICIANDO O PRÉ PROCESSAMENTO DA IMAGEM - {}".format(get_date_time_now("%d/%m/%Y %H:%M:%S")))
 
         try:
             # REALIZANDO O DESFOQUE GAUSSIANO
@@ -213,12 +218,28 @@ class Image_Pre_Processing(object):
                 validator, thresh = Image_Pre_Processing.threshold_image(self, blur)
 
         except Exception as ex:
-            print("ERRO NA FUNÇÃO: {} - {}".format(stack()[0][3], ex))
+            execute_log.error("ERRO NA FUNÇÃO: {} - {}".format(stack()[0][3], ex))
 
         return validator, thresh
 
 
     def preprocess_morfo_transformations(self, image):
+
+        """
+
+            APLICA TRANSFORMAÇÕES MORFOLÓGICAS NA IMAGEM.
+            O OBJETIVO É ENFATIZAR A ÁREA DA TABELA
+            PERMITINDO MAIOR SEPARAÇÃO TABELA/RESTO DA IMAGEM.
+
+            # Arguments
+                image                          - Required : Imagem para processamento (Array)
+
+            # Returns
+                validator                      - Required : Validador de execução da função (Boolean)
+                horizontally_dilated           - Required : Imagem dilatada horizontalmente (Array)
+                vertically_dilated             - Required : Imagem dilatada verticalmente (Array)
+
+        """
 
         # INICIANDO O VALIDADOR DA FUNÇÃO
         validator = False
@@ -226,8 +247,7 @@ class Image_Pre_Processing(object):
         # INICIANDO A VARIÁVEL DE RETORNO
         horizontally_dilated = vertically_dilated = None
 
-        print(
-            "OCR TABLES - TÉCNICA DE TRANSFORMAÇÕES MORFOLÓGICAS - {}".format(get_date_time_now("%d/%m/%Y %H:%M:%S")))
+        execute_log.info("OCR TABLES - TÉCNICA DE TRANSFORMAÇÕES MORFOLÓGICAS - {}".format(get_date_time_now("%d/%m/%Y %H:%M:%S")))
 
         try:
             # OBTENDO O COMPRIMENTO E AMPLITUDE DA IMAGEM
@@ -248,12 +268,12 @@ class Image_Pre_Processing(object):
             validator = True
 
         except Exception as ex:
-            print("ERRO NA FUNÇÃO: {} - {}".format(stack()[0][3], ex))
+            execute_log.error("ERRO NA FUNÇÃO: {} - {}".format(stack()[0][3], ex))
 
         return validator, horizontally_dilated, vertically_dilated
 
 
-    def __get_max_contour(self, img):
+    def __get_max_contour(self, horizontally_dilated, vertifically_dilated):
 
         """
 
@@ -267,60 +287,57 @@ class Image_Pre_Processing(object):
             2) OBTÉM O CONTORNO DE MÁXIMA ÁREA.
 
             # Arguments
-                img                - Required : Imagem para processamento (Array)
+                horizontally_dilated           - Required : Imagem dilatada horizontalmente (Array)
+                vertically_dilated             - Required : Imagem dilatada verticalmente (Array)
 
             # Returns
-                roi                - Required : Área de interesse (Array)
+                validator                      - Required : Validador de execução da função (Boolean)
+                bounding_rects                 - Required : Contornos obtidos (Array)
 
         """
 
         # INICIANDO A VARIAVEL QUE ARMAZENARÁ O VALOR DE MÁXIMA ÁREA DE CONTORNO
-        roi = max_area = 0
+        bounding_rects = []
 
         # INICIANDO O VALIDADOR DA FUNÇÃO
         validator = False
 
-        print("OCR RG - BUSCANDO O DOCUMENTO NA IMAGEM - {}".format(get_date_time_now("%d/%m/%Y %H:%M:%S")))
+        execute_log.info("OCR TABLES - BUSCANDO O DOCUMENTO NA IMAGEM - {}".format(get_date_time_now("%d/%m/%Y %H:%M:%S")))
 
         try:
-            # OBTENDO TODOS OS CONTORNOS
-            contours, _ = cv2.findContours(img, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
+            # OBTENDO A MÁSCARA E OBTENDO OS CONTORNOS
+            mask = horizontally_dilated + vertifically_dilated
+            contours, heirarchy = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
-            # PERCORRENDO TODOS OS CONTORNOS
-            for contour in contours:
+            # OBTENDO OS CONTORNOS COM TAMANHO MAIOR QUE DA ÁREA MIN ESPERADA
+            contours = [c for c in contours if cv2.contourArea(c) > self.min_table_area]
 
-                # OBTENDO O TAMANHO DA ÁREA DO CONTORNO
-                area = cv2.contourArea(contour)
-
-                # VERIFICANDO SE O VALOR É MAIOR DO QUE ATUALMENTE É A MÁXIMA ÁREA
-                if area > max_area:
-
-                    # CASO VALOR ATUAL SEJA MAIOR QUE A MÁXIMA ÁREA, O VALOR DA MÁXIMA ÁREA É ATUALIZADO
-                    max_area = area
-
-                    # ROI ARMAZENA O CONTORNO
-                    roi = contour
+            # DESSES CONTORNOS, OBTENÇÃO DA TABELA
+            perimeter_lenghts = [cv2.arcLength(c, True) for c in contours]
+            epsilons = [0.1 * p for p in perimeter_lenghts]
+            approx_polys = [cv2.approxPolyDP(c, e, True) for c, e in zip(contours, epsilons)]
+            bounding_rects = [cv2.boundingRect(a) for a in approx_polys]
 
             validator = True
 
         except Exception as ex:
-            print("ERRO NA FUNÇÃO: {} - {}".format(stack()[0][3], ex))
+            execute_log.error("ERRO NA FUNÇÃO: {} - {}".format(stack()[0][3], ex))
 
-        return validator, roi
+        return validator, bounding_rects
 
 
-    def __crop_image_countour(self, img, contour):
+    def __crop_image_countour(self, image, contour):
 
         """
 
-            REALIZA O CROP DA IMAGEM ORIGINAL COM BASE NO CONTORNO DE MÁXIMA ÁREA ENCONTRADO.
+            REALIZA A OBTENÇÃO DAS TABELAS (CROPS) COM BASE NOS CONTORNOS ENCONTRADOS.
 
             # Arguments
-                img                 - Required : Imagem para processamento (Array)
-                contour             - Required : Valor do contorno da imagem (Array)
+                image                       - Required : Imagem para processamento (Array)
+                contour                     - Required : Valor dos contornos da imagem (Array)
 
             # Returns
-                mask                - Required : Imagem com a máscara de contornos (Array)
+                images_cropped_contour      - Required : Images cropadas (Array)
 
         """
 
@@ -328,31 +345,23 @@ class Image_Pre_Processing(object):
         validator = False
 
         # INICIANDO AS VARIÁVEIS QUE ARMAZENARÃO A LISTA DE CONTORNOS NA HORIZONTAL E VERTICAL
-        x, y = [], []
+        images_cropped_contour = []
 
-        print("OCR RG - CROPPANDO O DOCUMENTO NA IMAGEM - {}".format(get_date_time_now("%d/%m/%Y %H:%M:%S")))
+        execute_log.info("OCR TABLES - CROPPANDO O DOCUMENTO NA IMAGEM - {}".format(get_date_time_now("%d/%m/%Y %H:%M:%S")))
 
         try:
-            for contour_line in contour:
-                x.append(contour_line[0][0])
-                y.append(contour_line[0][1])
 
-            # OBTENDO OS VALORES MIN E MÁXIMO DE CADA EIXO
-            x1, x2, y1, y2 = min(x), max(x), min(y), max(y)
-
-            # APLICANDO O CROP NA IMAGEM
-            image_cropped_contour = img[y1:y2, x1:x2]
+            # OBTENDO AS TABELAS DE ACORDO COM OS CONTORNOS ENCONTRADOS
+            images_cropped_contour = [image[y:y+h, x:x+w] for x, y, w, h in contour]
 
             validator = True
 
-            print("OCR RG - CROP REALIZADO COM SUCESSO - {}".format(get_date_time_now("%d/%m/%Y %H:%M:%S")))
-
-            return validator, image_cropped_contour
+            return validator, images_cropped_contour
 
         except Exception as ex:
-            print("ERRO NA FUNÇÃO: {} - {}".format(stack()[0][3], ex))
+            execute_log.error("ERRO NA FUNÇÃO: {} - {}".format(stack()[0][3], ex))
 
-        return validator, img
+        return validator, image
 
 
     def get_contours(self, img_horizontal, img_vertical):
@@ -367,10 +376,11 @@ class Image_Pre_Processing(object):
             2) APLICA LIMIAR DOS PLANOS DA IMAGEM (ADAPTIVETHRESHOLD)
 
             # Arguments
-                img                    - Required : Imagem para processamento (Array)
+                img_horizontal        - Required : Máscara horizontal da imagem (Array)
+                img_vertical          - Required : Máscara vertical da imagem (Array)
 
             # Returns
-                thresh                - Required : Imagem após ambos processamentos (Array)
+                bounding_rects        - Required : Contorno da imagem - retangular (Array)
 
         """
 
@@ -380,7 +390,7 @@ class Image_Pre_Processing(object):
         # INICIANDO A VARIÁVEL DE RETORNO
         bounding_rects = None
 
-        print(
+        execute_log.info(
             "OCR TABLES - OBTENDO AS TABELAS - {}".format(get_date_time_now("%d/%m/%Y %H:%M:%S")))
 
         try:
@@ -402,18 +412,33 @@ class Image_Pre_Processing(object):
             validator = True
 
         except Exception as ex:
-            print("ERRO NA FUNÇÃO: {} - {}".format(stack()[0][3], ex))
+            execute_log.error("ERRO NA FUNÇÃO: {} - {}".format(stack()[0][3], ex))
 
         return validator, bounding_rects
 
 
     def find_tables(self, image):
 
+        """
+
+            ORQUESTRA A OBTENÇÃO DAS TABELAS CONTIDAS NA IMAGEM.
+
+            # Arguments
+                image                       - Required : Imagem para processamento (Array)
+
+            # Returns
+                image_cropped_contour       - Required : Imagem após ambos processamentos (Array)
+
+        """
+
+        # INICIANDO A VARIÁVEL DE RETORNO
+        tables = []
+
         # REALIZANDO O PRÉ PROCESSAMENTO DA IMAGEM COM BLURRING
         validator, preproc_img_blur_thresh = Image_Pre_Processing.preprocess_blur_threshold_img(self,
                                                                                                 image)
 
-        if validator:
+        if validator and preproc_img_blur_thresh is not None:
 
             # REALIZANDO A CÓPIA DA IMAGEM
             vertical = horizontal = preproc_img_blur_thresh.copy()
@@ -424,13 +449,15 @@ class Image_Pre_Processing(object):
 
             if validator:
 
-                validator, contour = Image_Pre_Processing.__get_max_contour(self,
-                                                                            preproc_img_blur_thresh)
+                # ENCONTRANDO OS MÁXIMOS CONTORNOS
+                validator, contours = Image_Pre_Processing.__get_max_contour(self,
+                                                                            horizontally_dilated,
+                                                                            vertically_dilated)
 
                 if validator:
 
                     # COM O CONTORNO ENCONTRADO A ÚLTIMA ETAPA, REALIZAMOS O CROP DA IMAGEM
-                    validator, image_cropped_contour = self.__crop_image_countour(image, contour)
+                    validator, image_cropped_contour = self.__crop_image_countour(image, contours)
 
                     print("FORAM ENCONTRADAS {} TABELAS".format(len(image_cropped_contour)))
 
