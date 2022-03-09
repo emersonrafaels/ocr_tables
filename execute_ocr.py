@@ -3,6 +3,7 @@ import re
 
 from dynaconf import settings
 
+import execute_log
 from UTILS.image_ocr import ocr_functions
 from UTILS.extract_infos import get_matchs_strings, get_matchs_line
 
@@ -16,13 +17,19 @@ class Execute_OCR():
 
     def pos_processing_cnpj(text_input, pattern):
 
-        # FORMATANDO O CNPJ OBTIDO
-        output = "{}.{}.{}/{}-{}".format(text_input[:2],
-                                         text_input[2:5],
-                                         text_input[8:12],
-                                         text_input[12:])
+        try:
+            # FORMATANDO O CNPJ OBTIDO
+            output = "{}.{}.{}/{}-{}".format(text_input[:2],
+                                             text_input[2:5],
+                                             text_input[8:12],
+                                             text_input[12:])
 
-        return output
+            return output
+
+        except Exception as ex:
+            execute_log.error("ERRO NA FUNÇÃO: {} - {}".format(stack()[0][3], ex))
+
+            return text_input
 
 
     def pos_processing_faturamento(text_input):

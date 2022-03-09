@@ -38,7 +38,9 @@ def result_extract_table(files):
     for image, tables in results:
 
         # EXECUTANDO O OCR
-        Execute_OCR().execute_pipeline_ocr(image, tables[0])
+        result_ocr, cnpj, json_result = Execute_OCR().execute_pipeline_ocr(image, tables[0])
+
+        print("RESULTADO OBTIDO:\n {}".format(result_ocr))
 
 # DEFININDO A IMAGEM A SER UTILIZADA
 files = [r"C:\Users\Emerson\Desktop\brainIAcs\MASSA_IMAGENS\CARTAS DE FATURAMENTO\Carta2.PNG"]
