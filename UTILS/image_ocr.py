@@ -19,7 +19,8 @@ import cv2
 import pytesseract
 
 from UTILS.generic_functions import converte_int
-import UTILS.image_view as image_view_functions
+from UTILS.image_view import image_view_functions
+from UTILS.image_read import read_image_gray
 
 # CONFIGURANDO O TESSERACT
 pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
@@ -403,20 +404,20 @@ class ocr_functions():
         validador = False
 
         # OBTENDO A ORIENTAÇÃO DA IMAGEM
-        validador, resultado_orientacao = ocr_functions.obtem_orientacao_imagem(self, self.imagem_atual)
+        # validador, resultado_orientacao = ocr_functions.obtem_orientacao_imagem(self, self.imagem_atual)
 
         # REALIZANDO A LEITURA DA IMAGEM
-        img_bgr = image_view_functions.realiza_leitura_imagem(self.imagem_atual)
+        img_gray = read_image_gray(self.imagem_atual)
 
         # REALIZANDO A VISUALIZAÇÃO DA IMAGEM
-        image_view_functions.visualiza_imagem(img_bgr)
+        image_view_functions().view_image(img_gray, window_name="CARTA_FATURAMENTO")
 
-        # REALIZANDO A CONVERSÃO DA IMAGEM EM RGB
-        validador, imagem_rgb = ocr_functions.converte_bgr_rgb(img_bgr)
+        validador = True
 
         if validador:
+
             # APLICANDO O OCR
-            validador, retorno_ocr = ocr_functions.orquestra_tipo_leitura_ocr(self, imagem_rgb)
+            validador, retorno_ocr = ocr_functions.orquestra_tipo_leitura_ocr(self, img_gray)
 
             if validador:
                 return retorno_ocr

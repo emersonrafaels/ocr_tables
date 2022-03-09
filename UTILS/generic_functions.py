@@ -21,8 +21,6 @@ import time
 
 import pandas as pd
 
-import execute_log
-
 
 def verify_exists(dir):
 
@@ -77,7 +75,7 @@ def get_files_directory(directory, format_types_accepted):
                         list_archives_accepted.append(path.join(root[0], files))
 
     except Exception as ex:
-        execute_log.error(f"ERRO NA FUNÇÃO {stack()[0][3]} - {ex}")
+        print(f"ERRO NA FUNÇÃO {stack()[0][3]} - {ex}")
 
     return list_archives_accepted
 

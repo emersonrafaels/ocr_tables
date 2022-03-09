@@ -16,13 +16,11 @@ class Execute_OCR():
 
     def pos_processing_cnpj(text_input, pattern):
 
-        # MANTENDO APENAS NÚMEROS
-        text_only_numbers = re.sub(pattern=pattern, string=text_input, repl="").strip()
-
-        output = "{}.{}.{}/{}-{}".format(text_only_numbers[:2],
-                                         text_only_numbers[2:5],
-                                         text_only_numbers[8:12],
-                                         text_only_numbers[12:])
+        # FORMATANDO O CNPJ OBTIDO
+        output = "{}.{}.{}/{}-{}".format(text_input[:2],
+                                         text_input[2:5],
+                                         text_input[8:12],
+                                         text_input[12:])
 
         return output
 
@@ -35,7 +33,7 @@ class Execute_OCR():
         return output
 
 
-    def execute_pipeline_ocr(dir_image):
+    def execute_pipeline_ocr(self, dir_full_image, dir_table_image):
 
         # INICIANDO AS VARIÁVEIS RESULTANTES
         result_ocr = ""
@@ -43,12 +41,12 @@ class Execute_OCR():
         json_result = []
 
         # REALIZANDO O OCR SOBRE A IMAGEM
-        result_ocr = ocr_functions.Orquestra_OCR(dir_image)
+        result_ocr = ocr_functions(dir_full_image).Orquestra_OCR()
 
         # OBTENDO - CNPJ
         list_result_cnpj = get_matchs_line(result_ocr, settings.PATTERN_CNPJ)
 
         # FORMATANDO O RESULTADO OBTIDO - CNPJ
-        cnpj = [Execute_OCR.pos_processing_cnpj(value[0]) for value in list_result_cnpj]
+        cnpj = [Execute_OCR.pos_processing_cnpj(value[-1], settings.PATTERN_CNPJ) for value in list_result_cnpj]
 
         return result_ocr, cnpj, json_result
