@@ -35,7 +35,7 @@ class Execute_OCR():
         return output
 
 
-    def orchestra_ocr(dir_image):
+    def execute_pipeline_ocr(dir_image):
 
         # INICIANDO AS VARIÁVEIS RESULTANTES
         result_ocr = ""

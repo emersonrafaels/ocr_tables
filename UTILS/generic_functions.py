@@ -16,10 +16,12 @@ __data_atualizacao__ = "04/07/2021"
 
 import datetime
 from inspect import stack
-from os import path, makedirs
+from os import path, makedirs, walk
 import time
 
 import pandas as pd
+
+import execute_log
 
 
 def verify_exists(dir):
@@ -45,6 +47,39 @@ def verify_exists(dir):
         print("ERRO NA FUNÇÃO {} - {]".format(stack()[0][3], ex))
 
     return validador
+
+
+def get_files_directory(directory, format_types_accepted):
+
+    """
+
+        FUNÇÃO PARA OBTER OS ARQUIVOS EM UM DETERMINADO DIRETÓRIO
+        FILTRANDO APENAS OS ARQUIVOS DOS FORMATOS ACEITOS POR ESSA API
+
+        # Arguments
+            directory                    - Required : Caminho/Diretório para obter os arquivos (String)
+            format_types_accepted        - Required : Tipos de arquivos aceitos (List)
+
+        # Returns
+            list_archives_accepted       - Required : Caminho dos arquivos listados (List)
+
+    """
+
+    # INICIANDO A VARIÁVEL QUE ARMAZENARÁ O RESULTADO
+    list_archives_accepted = []
+
+    try:
+        # OBTENDO A LISTA DE ARQUIVOS CONTIDOS NO DIRETÓRIO
+        for root in walk(directory):
+            for dir in root:
+                for files in dir:
+                    if path.splitext(files)[1] in format_types_accepted:
+                        list_archives_accepted.append(path.join(root[0], files))
+
+    except Exception as ex:
+        execute_log.error(f"ERRO NA FUNÇÃO {stack()[0][3]} - {ex}")
+
+    return list_archives_accepted
 
 
 def create_path(dir):

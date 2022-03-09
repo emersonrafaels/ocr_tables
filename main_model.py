@@ -25,6 +25,9 @@ from execute_extract_table import Extract_Table
 from execute_ocr import Execute_OCR
 import execute_log
 
+from UTILS.base64_encode_decode import image_to_base64
+
+# INICIANDO OS LOGS DO SISTEMA
 execute_log.startLog()
 
 def result_extract_table(files):
@@ -39,5 +42,8 @@ def result_extract_table(files):
 
 # DEFININDO A IMAGEM A SER UTILIZADA
 files = [r"C:\Users\Emerson\Desktop\brainIAcs\MASSA_IMAGENS\CARTAS DE FATURAMENTO\Carta2.PNG"]
+
+# CONVERTENDO A IMAGEM EM BASE64
+files_base64 = [image_to_base64(file) for file in files]
 
 result_extract_table(files)
