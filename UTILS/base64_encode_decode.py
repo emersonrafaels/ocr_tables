@@ -20,7 +20,10 @@ __data_atualizacao__ = "08/03/2022"
 import base64
 from inspect import stack
 import imghdr
+import mimetypes
 import os
+
+import magic
 
 import execute_log
 
@@ -30,6 +33,11 @@ def base64_get_extension(file_base64_decode):
     """
 
          ESSA FUNÇÃO RETORNA O TIPO DA IMAGEM DECODIFICADA DO BASE64.
+
+         PARA OBTER A EXTENSÃO UTILIZA-SE O MIMETYPE:
+            Adivinha a extensão de um arquivo com base em seu tipo MIME, fornecido por tipo .
+            O valor de retorno é uma string que fornece uma
+            extensão de nome de arquivo, incluindo o ponto inicial ( '.')
 
          # Arguments
             file_base64_decode          - Required : Input no formato Base64 Decodificado (Stromg)
@@ -43,7 +51,9 @@ def base64_get_extension(file_base64_decode):
 
     try:
         # OBTENDO A EXTENSÃO
-        extension = imghdr.what(None, base64.b64decode(file_base64_decode))
+        mime_type = magic.from_buffer(file_base64_decode, mime=True)
+        extension = mimetypes.guess_extension(mime_type)
+
     except Exception as ex:
         execute_log.error("ERRO NA FUNÇÃO {} - {]".format(stack()[0][3], ex))
 
