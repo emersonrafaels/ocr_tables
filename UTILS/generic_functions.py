@@ -16,7 +16,7 @@ __data_atualizacao__ = "04/07/2021"
 
 import datetime
 from inspect import stack
-from os import path, makedirs, walk
+from os import path, makedirs, walk, getcwd
 import time
 
 import pandas as pd
@@ -144,6 +144,7 @@ def get_split_dir(dir):
         CABEÇA: '/home/User/Desktop'
         CAUDA: 'file.txt'
 
+        * O DIR PODE SER UMA BASE64
 
         # Arguments
             dir                 - Required : Caminho a ser splitado (String)

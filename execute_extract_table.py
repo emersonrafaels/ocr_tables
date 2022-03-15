@@ -58,28 +58,42 @@ class Extract_Table():
 
             # Arguments
                 input_file                       - Required : Caminho do(s) arquivo(s) a serme lidos.
-                                                    Pode ser enviado um Path (String) ou Base64 (String)
+                                                              Pode ser enviado um Path (String) ou Base64 (String)
+                input_type                      - Required : Tipo do input (String)
 
             # Returns
                 list_files_result                - Required : Caminho do(s) arquivo(s) listados. (List)
 
         """
 
+        # INICIANDO A VARIÁVEL QUE ARMAZENARÁ O TIPO DE INPUT
+        input_type = None
+
         # VERIFICANDO SE O ARGUMENTO ENVIADO É UMA BASE64
         if type(input_file) == bytes:
             # O INPUT É UMA BASE64
             # CHAMA-SE AQ FUNÇÃO PARA DECODIFICAR A BASE64
-            return [base64_to_image(input_file)]
+
+            input_type = "BYTES"
+
+            return input_type, [base64_to_image(input_file)]
 
         # VERIFICANDO SE O ARGUMENTO ENVIADO É O CAMINHO DE UM ARQUIVO
         elif str(input_file).find(".") != -1:
             # O INPUT É UM ARQUIVO
-            return [input_file]
+
+            input_type = "ARCHIVE"
+
+            return input_type, [input_file]
 
         else:
             # O INPUT É UM DIRETÓRIO
             # CHAMA-SE A FUNÇÃO PARA OBTER TODOS OS ARQUIVOS NO DIRETÓRIO
-            return generic_functions.get_files_directory
+
+            input_type = "DIRECTORY"
+
+            return input_type, generic_functions.get_files_directory(input_file,
+                                                                     settings.FORMAT_TYPES_ACCEPTED)
 
 
     def main_extract_table(self, list_images):
@@ -108,20 +122,20 @@ class Extract_Table():
             # INICIANDO A VARIÁVEL QUE ARMAZENARÁ OS RESULTADOS (PARA CADA TABELA OBTIDA)
             list_result_tables = []
 
-            # OBTENDO O DIRETÓRIO E O NOME DO ARQUIVO
-            directory, filename = generic_functions.get_split_dir(file)
-
-            # OBTENDO O NOME DO ARQUIVO SEM EXTENSÃO
-            filename_without_extension = os.path.splitext(filename)[0]
-
             # VERIFICANDO O TIPO DE ENVIO
-            images = Extract_Table.orchestra_get_files(file)
+            input_type, images = Extract_Table.orchestra_get_files(file)
 
             for image_file in images:
 
+                # OBTENDO O DIRETÓRIO E O NOME DO ARQUIVO
+                directory, filename = generic_functions.get_split_dir(image_file)
+
+                # OBTENDO O NOME DO ARQUIVO SEM EXTENSÃO
+                filename_without_extension = os.path.splitext(image_file)[0]
+
                 # REALIZANDO A LEITURA DA IMAGEM
                 # LEITURA EM ESCALA DE CINZA
-                image = read_image_gray(file)
+                image = read_image_gray(image_file)
 
                 # OBTENDO AS TABELAS CONTIDAS NA IMAGEM
                 tables = Image_Pre_Processing().find_tables(image)
@@ -156,7 +170,7 @@ class Extract_Table():
                         # ARMAZENANDO O RESULTADO
                         # ARQUIVO DE INPUT (file)
                         # TABELAS OBTIDAS (list_result_tables)
-                        results.append((file, list_result_tables))
+                        results.append((image_file, list_result_tables))
 
                         execute_log.info("TABELA - {} SALVA COM SUCESSO".format(idx_table))
 

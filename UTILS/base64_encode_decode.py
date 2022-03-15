@@ -19,6 +19,7 @@ __data_atualizacao__ = "08/03/2022"
 
 import base64
 from inspect import stack
+import os
 
 import execute_log
 
@@ -40,7 +41,7 @@ def base64_to_image(file_base64):
     """
 
     # FORMATANDO O NOME DE SAVE DO ARQUIVO PNG
-    built_image = "IMAGE_BASE64.png"
+    built_image = os.path.join(os.getcwd(), "INPUT_BASE64.PNG")
 
     # REALIZANDO A ABERTURA DE UM ARQUIVO (QUE SERÁ ESCRITO NA MÁQUINA)
     with open(built_image, "wb") as image_base64:
