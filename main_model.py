@@ -48,4 +48,4 @@ files = [r"C:\Users\Emerson\Desktop\brainIAcs\MASSA_IMAGENS\CARTAS DE FATURAMENT
 # CONVERTENDO A IMAGEM EM BASE64
 files_base64 = [image_to_base64(file) for file in files]
 
-result_extract_table(files)
+result_extract_table(files_base64)

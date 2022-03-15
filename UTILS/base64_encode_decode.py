@@ -19,9 +19,35 @@ __data_atualizacao__ = "08/03/2022"
 
 import base64
 from inspect import stack
+import imghdr
 import os
 
 import execute_log
+
+
+def base64_get_extension(file_base64_decode):
+
+    """
+
+         ESSA FUNÇÃO RETORNA O TIPO DA IMAGEM DECODIFICADA DO BASE64.
+
+         # Arguments
+            file_base64_decode          - Required : Input no formato Base64 Decodificado (Stromg)
+
+        # Returns
+            extension                  - Required : Extensão da imagem decodificada (String)
+
+    """
+
+    extension = None
+
+    try:
+        # OBTENDO A EXTENSÃO
+        extension = imghdr.what(None, base64.b64decode(file_base64_decode))
+    except Exception as ex:
+        execute_log.error("ERRO NA FUNÇÃO {} - {]".format(stack()[0][3], ex))
+
+    return extension
 
 
 def base64_to_image(file_base64):
@@ -49,7 +75,13 @@ def base64_to_image(file_base64):
         try:
             # DECODOFICANDO A BASE64, ARMAZENANDO-O NO OBJETO ABERTO
             # ESCREVENDO NA MÁQUINA
-            image_base64.write(base64.b64decode(file_base64.decode()))
+
+            result_decode = base64.b64decode(file_base64.decode())
+
+            # OBTENDO A EXTENSÃO DO ARQUIVO
+            extension = base64_get_extension(result_decode)
+
+            image_base64.write(result_decode)
 
         except Exception as ex:
             execute_log.error("ERRO NA FUNÇÃO {} - {]".format(stack()[0][3], ex))
