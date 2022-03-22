@@ -1,3 +1,27 @@
+"""
+
+    ORQUESTRA A APLICAÇÃO DE OCR SOBRE UMA IMAGEM.
+    OBTÉM CNPJ, MESES E VALORES DE FATURAMENTO.
+
+    O OCR É APLICADO SOBRE A IMAGEM COMPLETA (dir_full_image)
+    E SOBRE AS TABELAS (SE ENCONTRADAS) (dir_table_image).
+
+
+    # Arguments
+        dir_full_image              - Required : Caminho ds imagem completa (String)
+        dir_table_image             - Required : Caminho dss tabelas encontradas (String)
+
+    # Returns
+        validador                   - Required : Validador de execução da função (Boolean)
+        retorno_ocr                 - Required : Retorno do OCR (String | Dict)
+
+"""
+
+__version__ = "1.0"
+__author__ = """Emerson V. Rafael (EMERVIN)"""
+__data_atualizacao__ = "22/03/2022"
+
+
 from inspect import stack
 import re
 
