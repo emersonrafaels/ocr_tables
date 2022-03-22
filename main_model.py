@@ -16,7 +16,7 @@
 
 __version__ = "1.0"
 __author__ = """Emerson V. Rafael (EMERVIN)"""
-__data_atualizacao__ = "05/11/2021"
+__data_atualizacao__ = "22/03/2022"
 
 
 from dynaconf import settings
@@ -43,9 +43,9 @@ def result_extract_table(files):
         print("RESULTADO OBTIDO:\n {}".format(result_ocr))
 
 # DEFININDO A IMAGEM A SER UTILIZADA
-files = [r"C:\Users\Emerson\Desktop\brainIAcs\MASSA_IMAGENS\CARTAS DE FATURAMENTO\Carta2.PNG"]
+files = r"C:\Users\Emerson\Desktop\brainIAcs\MASSA_IMAGENS\CARTAS DE FATURAMENTO\Carta2.PNG"
 
 # CONVERTENDO A IMAGEM EM BASE64
-files_base64 = [image_to_base64(file) for file in files]
+# files_base64 = [image_to_base64(file) for file in files]
 
-result_extract_table(files_base64)
+result_extract_table(image_to_base64(files))

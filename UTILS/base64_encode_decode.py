@@ -125,6 +125,6 @@ def image_to_base64(file_image):
         built_base64 = base64.b64encode(open(file_image, 'rb').read())
 
     except Exception as ex:
-        execute_log.error("ERRO NA FUNÇÃO {} - {]".format(stack()[0][3], ex))
+        execute_log.error("ERRO NA FUNÇÃO {} - {}".format(stack()[0][3], ex))
 
     return built_base64

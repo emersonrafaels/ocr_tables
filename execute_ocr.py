@@ -42,10 +42,29 @@ class Execute_OCR():
 
     def execute_pipeline_ocr(self, dir_full_image, dir_table_image):
 
+        """
+
+            ORQUESTRA A APLICAÇÃO DE OCR SOBRE UMA IMAGEM.
+            OBTÉM CNPJ, MESES E VALORES DE FATURAMENTO.
+
+            O OCR É APLICADO SOBRE A IMAGEM COMPLETA (dir_full_image)
+            E SOBRE AS TABELAS (SE ENCONTRADAS) (dir_table_image).
+
+
+            # Arguments
+                dir_full_image              - Required : Caminho ds imagem completa (String)
+                dir_table_image             - Required : Caminho dss tabelas encontradas (String)
+
+            # Returns
+                validador                   - Required : Validador de execução da função (Boolean)
+                retorno_ocr                 - Required : Retorno do OCR (String | Dict)
+
+        """
+
         # INICIANDO AS VARIÁVEIS RESULTANTES
         result_ocr = ""
-        list_result_cnpj = ""
-        json_result = []
+        json_result = {}
+        json_result["cnpj"] = ""
 
         # REALIZANDO O OCR SOBRE A IMAGEM
         result_ocr = ocr_functions(dir_full_image).Orquestra_OCR()
@@ -54,6 +73,6 @@ class Execute_OCR():
         list_result_cnpj = get_matchs_line(result_ocr, settings.PATTERN_CNPJ)
 
         # FORMATANDO O RESULTADO OBTIDO - CNPJ
-        cnpj = [Execute_OCR.pos_processing_cnpj(value[-1], settings.PATTERN_CNPJ) for value in list_result_cnpj]
+        json_result["cnpj"] = [Execute_OCR.pos_processing_cnpj(value[-1], settings.PATTERN_CNPJ) for value in list_result_cnpj]
 
-        return result_ocr, cnpj, json_result
+        return result_ocr, json_result

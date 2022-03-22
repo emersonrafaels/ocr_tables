@@ -13,7 +13,7 @@
 
 __version__ = "1.0"
 __author__ = """Emerson V. Rafael (EMERVIN)"""
-__data_atualizacao__ = "03/07/2021"
+__data_atualizacao__ = "22/03/2022"
 
 import cv2
 import pytesseract
@@ -410,7 +410,7 @@ class ocr_functions():
         img_gray = read_image_gray(self.imagem_atual)
 
         # REALIZANDO A VISUALIZAÇÃO DA IMAGEM
-        image_view_functions().view_image(img_gray, window_name="CARTA_FATURAMENTO")
+        # image_view_functions().view_image(img_gray, window_name="CARTA_FATURAMENTO")
 
         validador = True
 
