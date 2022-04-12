@@ -18,6 +18,7 @@ import datetime
 from inspect import stack
 from os import path, makedirs, walk, getcwd
 import time
+from unidecode import unidecode
 
 import pandas as pd
 
@@ -257,3 +258,62 @@ def get_date_time_now(return_type):
         print("ERRO NA FUNÇÃO {} - {}".format(stack()[0][3], ex))
         return datetime.datetime.now()
 
+
+def verify_find_intersection(data_verified, data_lists):
+
+    """
+
+        FUNÇÃO PARA VERIFICAR SE UM DADO (DATA_VERIFIED) ESTÁ CONTIDO
+        EM QUALQUER ELEMENTO DE UMA LISTA DE DADOS.
+
+        ESSA VERIFICAÇÃO É REALIZADA UTILIZANDO PARTE DA STRING,
+        NESSE CASO, UTILIZA-SE O MÉTODO 'FIND'.
+
+        # Arguments
+            data_verified               - Required : Dado a ser verificado (String)
+            data_lists                  - Required : Lista de dados (List)
+
+        # Returns
+            validador                   - Required : Validador da função (String)
+
+    """
+
+    # INICIANDO O VALIDADOR DA FUNÇÃO
+    validador = False
+
+    try:
+        # PERCORRENDO TODOS OS DADOS DA LISTA DE DADOS
+        for value in data_lists:
+
+            # VERIFICANDO SE O VALOR A SER VERIFICADO ESTÁ CONTIDO NA LISTA DE DADOS
+            # ESSA VERIFICAÇÃO É REALIZADA UTILIZANDO PARTE DA STRING
+            # NESSE CASO, UTILIZA-SE O MÉTODO 'FIND'
+            if data_verified.find(value) != -1 and data_verified != "":
+                validador = True
+                break
+
+    except Exception as ex:
+        print("ERRO NA FUNÇÃO {} - {}".format(stack()[0][3], ex))
+
+    return validador
+
+
+def convert_text_unidecode(text):
+
+    """
+
+        TRANSFORMA O TEXTO PURO EM FORMATO UNIDECODE (SEM ACENTOS).
+
+        # Arguments
+            text                    - Required : Texto a ser convertido. (String)
+
+        # Returns
+            text_unidecode          - Required : Texto após conversão. (String)
+
+    """
+
+    try:
+        return unidecode(text)
+    except Exception as ex:
+        print("ERRO NA FUNÇÃO {} - {}".format(stack()[0][3], ex))
+        return text

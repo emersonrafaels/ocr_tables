@@ -180,4 +180,8 @@ class Extract_Table():
 
                     execute_log.info("TABELA - {} SALVA COM SUCESSO".format(idx_table))
 
+            # CASO NÃO ENCONTROU TABELAS
+            else:
+                results.append((image_file, [None]))
+
         return results
