@@ -76,7 +76,7 @@ def get_files_directory(directory, format_types_accepted):
                         list_archives_accepted.append(path.join(root[0], files))
 
     except Exception as ex:
-        print(f"ERRO NA FUNÇÃO {stack()[0][3]} - {ex}")
+        print("ERRO NA FUNÇÃO {} - {]".format(stack()[0][3], ex))
 
     return list_archives_accepted
 

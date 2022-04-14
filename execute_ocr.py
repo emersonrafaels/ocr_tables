@@ -38,7 +38,9 @@ class Execute_OCR():
     def __init__(self):
 
         # 1 - OBTENDO A LISTA DE MESES
-        self.list_values_months = list(settings.DICT_MONTHS_ABREV.keys()) + list(settings.DICT_MONTHS_COMPLETE.keys())
+        self.list_values_months_abrev = list(settings.DICT_MONTHS_ABREV.keys())
+        self.list_values_months_complete = list(settings.DICT_MONTHS_COMPLETE.keys())
+        self.list_values_months = self.list_values_months_abrev + self.list_values_months_complete
 
 
     @staticmethod
@@ -92,18 +94,70 @@ class Execute_OCR():
 
         """
 
+        # INICIANDO A VARIÁVEL CONTENDO A LISTA DE RESULTADO
+        list_filter_result = []
+
         # OBTENDO - FATURAMENTO - FORMA 1
         list_result_faturamento = get_matchs_line(text_input, settings.PATTERN_FATURAMENTO_1)
 
-        # FILTANDO FATURAMENTOS QUE POSSUEM MESES OU FORMATO DE ANO (XXXX)
-        list_filter_result = [value[0] for value in list_result_faturamento if verify_find_intersection(value[0],
-                                                                                                     self.list_values_months)]
+        if list_result_faturamento:
+
+            # FILTRANDO RESULTADOS QUE POSSUEM MESES
+            list_filter_result = [value[0] for value in list_result_faturamento if verify_find_intersection(value[0],
+                                                                                                            self.list_values_months)]
+
+            if list_filter_result:
+
+                return list_filter_result
+
+        if not list_filter_result:
+
+            # FILTRANDO RESULTADOS QUE POSSUEM MESES
+            list_filter_result = [value for value in text_input.split("\n") if verify_find_intersection(value,
+                                                                                                        self.list_values_months_complete)]
 
         return list_filter_result
 
 
+    def pos_processing_faturamento(self, list_result_faturamento):
+
+        """
+
+            FUNÇÃO RESPONSÁVEL POR FORMATAR A LISTA DE POSSÍVEIS VALORES DE FATURAMENTO
+            REALIZANDO A OBTENÇÃO DAS INFORMAÇÕES DE:
+                1) MÊS
+                2) ANO
+                3) FATURAMENTO
+
+            # Arguments
+                list_result_faturamento                      - Required : Lista com os
+                                                                          valores de faturamento (List)
+
+            # Returns
+                list_result_faturamento_formatted            - Required : Resultado de faturamento
+                                                                          após formatação (List)
+
+        """
+
+        # DADO UMA LISTA DE VALORES, BUSCAMOS OBTER:
+            # 1) UM VALOR MÊS DESSA LISTA (HÁ A LISTA DE MESES POSSÍVEIS)
+            # 2) UM ANO DESSA LISTA (4 NÚMEROS, ENTRE 1900 E 2500)
+            # 3) VALORES DE FATURAMENTO (NÚMEROS, COM VALORES ACIMA DE 2500)
+
+        # PERCORRENDO CADA UM DOS VALORES DA LISTA
+        for value in list_result_faturamento:
+
+            # CAPTURANDO O VALOR DE MÊS
+            result_month = [month for month in self.list_values_months_complete if value.find(month)!=-1]
+
+            # CAPTURANDO O VALOR DE ANO
+            result_year = re.match(pattern=settings.REGEX_DATE_VALID, string=value)
+
+        print(result_month)
+
+
     @staticmethod
-    def pos_processing_faturamento(list_result_faturamento, pattern=None):
+    def get_result_faturamento(list_result_faturamento, pattern=None):
 
         """
 
@@ -112,15 +166,21 @@ class Execute_OCR():
                 2) MESES (result_months)
                 3) VALORES DE FATURAMENTO (result_values_faturamento)
 
+            AO FINAL, REALIZA A UNIFICAÇÃO DAS LISTAS EM UM DICT.
+
+            O RESULTADO FINAL TEM O FORMATO:
+                'tabela_valores': {0: ['OUTUBRO', '2016', '298.320,00'], 0: ['DEZEMBRO', '2016', '300.320,00']}
+
             # Arguments
                 list_result_faturamento         - Required : Lista com os
                                                              valores de faturamento (List)
-                 pattern                        - Required : Pattern de formatação a ser utilizado (String)
 
             # Returns
                 result_years                    - Required : Resultado contendo os anos obtidos (String)
                 result_months                   - Required : Resultado contendo os meses obtidos (String)
                 result_values_faturamentos      - Required : Resultado contendo os faturamentos obtidos (String)
+                result_values_faturamentos_dict - Required : Resultando zipando os
+                                                             resultados de ano, mes e valores (Dict)
 
         """
 
@@ -128,6 +188,7 @@ class Execute_OCR():
         result_years = []
         result_months = []
         result_values_faturamentos = []
+        result_values_faturamentos_dict = {}
 
         try:
             # PERCORRENDO CADA UM DOS FATURAMENTOS OBTIDOS
@@ -148,10 +209,78 @@ class Execute_OCR():
                 result_months.append(result_split[1])
                 result_values_faturamentos.append(result_split[-1])
 
+            result_values_faturamentos_dict = {index: list(value) for index,
+                                                                      value in enumerate(list(zip(result_years,
+                                                                                                  result_months,
+                                                                                                  result_values_faturamentos)))}
+
         except Exception as ex:
             execute_log.error("ERRO NA FUNÇÃO: {} - {}".format(stack()[0][3], ex))
 
-        return result_years, result_months, result_values_faturamentos
+        return result_values_faturamentos_dict, result_years, result_months, result_values_faturamentos
+
+
+    @staticmethod
+    def get_result_faturamento_alternate_format(list_result_faturamento, pattern=None):
+
+        """
+
+            REALIZA A SEPARAÇÃO DA LISTA DE FATURAMENTO EM:
+                1) ANOS (result_years)
+                2) MESES (result_months)
+                3) VALORES DE FATURAMENTO (result_values_faturamento)
+
+            AO FINAL, REALIZA A UNIFICAÇÃO DAS LISTAS EM UM DICT.
+
+            O RESULTADO FINAL TEM O FORMATO:
+                'tabela_valores': [{'mes': 'OUTUBRO', 'ano': '2016', 'valor': '298.320,00'}, {'mes': 'DEZEMBRO', 'ano': '2016', 'valor': '300.320,00'}]
+
+            # Arguments
+                list_result_faturamento         - Required : Lista com os
+                                                             valores de faturamento (List)
+
+            # Returns
+                result_years                    - Required : Resultado contendo os anos obtidos (String)
+                result_months                   - Required : Resultado contendo os meses obtidos (String)
+                result_values_faturamentos      - Required : Resultado contendo os faturamentos obtidos (String)
+                result_values_faturamentos_list - Required : Resultando zipando os
+                                                             resultados de ano, mes e valores (List)
+
+        """
+
+        # INICIALIZANDO AS LISTAS RESULTADOS
+        result_years = []
+        result_months = []
+        result_values_faturamentos = []
+        result_values_faturamentos_list = {}
+
+        try:
+            # PERCORRENDO CADA UM DOS FATURAMENTOS OBTIDOS
+            for value in list_result_faturamento:
+
+                if pattern:
+                    # MANTENDO APENAQS OS NÚMEROS DO CNPJ DE INPUT
+                    value = re.sub(pattern=pattern, repl="", string=value)
+
+                # RETIRANDO ESPAÇOS A MAIS
+                value = " ".join(filter(lambda x: x, value.split(' ')))
+
+                # SEPARANDO OS VALORES OBIDOS POR ESPAÇO
+                result_split = value.split(" ")
+
+                # ADICIONANDO O RESULTADO DO SPLIT
+                result_years.append(result_split[0])
+                result_months.append(result_split[1])
+                result_values_faturamentos.append(result_split[-1])
+
+                result_values_faturamentos_list.append(dict(mes=result_years[-1],
+                                                            ano=result_months[-1],
+                                                            valor=result_values_faturamentos[-1]))
+
+        except Exception as ex:
+            execute_log.error("ERRO NA FUNÇÃO: {} - {}".format(stack()[0][3], ex))
+
+        return result_values_faturamentos_list, result_years, result_months, result_values_faturamentos
 
 
     def execute_pipeline_ocr(self, dir_full_image, dir_table_image):
@@ -177,8 +306,8 @@ class Execute_OCR():
         # INICIANDO AS VARIÁVEIS RESULTANTES
         result_ocr = ""
         json_result = {}
-        json_result["cnpj"] = ""
-        json_result["faturamento"] = ""
+        json_result["cnpj_cliente"] = ""
+        json_result["tabela_valores"] = ""
 
         # REALIZANDO O OCR SOBRE A IMAGEM
         result_ocr = ocr_functions(dir_full_image).Orquestra_OCR()
@@ -190,14 +319,20 @@ class Execute_OCR():
         list_result_cnpj = get_matchs_line(result_ocr, settings.PATTERN_CNPJ)
 
         # FORMATANDO O RESULTADO OBTIDO - CNPJ
-        json_result["cnpj"] = [Execute_OCR.pos_processing_cnpj(value[-1],
+        json_result["cnpj_cliente"] = [Execute_OCR.pos_processing_cnpj(value[-1],
                                                                settings.PATTERN_ONLY_NUMBERS) for value in list_result_cnpj]
 
         # OBTENDO A TABELA DE FATURAMENTO
-        json_result["faturamento"] = Execute_OCR.get_table_faturamento(self, result_ocr)
+        result_table = Execute_OCR.get_table_faturamento(self, result_ocr)
+
+        # REALIZANDO O PÓS PROCESSAMENTO DA TABELA DE FATURAMENTO
+        Execute_OCR.pos_processing_faturamento(self, result_table)
 
         # FORMATANDO O RESULTADO OBTIDO - TABELA DE FATURAMENTO
-        result_years, result_months, result_values_faturamento = Execute_OCR.pos_processing_faturamento(json_result["faturamento"],
-                                                                                                        settings.REGEX_ONLY_LETTERS_NUMBERS_DOT_BARS_DASHES_COMMA)
+        json_result["tabela_valores"], \
+        result_years, \
+        result_months, \
+        result_values_faturamento = Execute_OCR.get_result_faturamento(result_table,
+                                                                       settings.REGEX_ONLY_LETTERS_NUMBERS_DOT_BARS_DASHES_COMMA)
 
         return result_ocr, json_result
