@@ -77,4 +77,6 @@ DICT_MONTHS_ABREV = {"JAN" = 1, "FEV" = 2, "MAR" = 3, "ABR" = 4, "MAI" = 5, "JUN
 
 DICT_MONTHS_COMPLETE = {"JANEIRO" = 1, "FEVEREIRO" = 2, "MARCO" = 3, "ABRIL" = 4, "MAIO" = 5, "JUNHO" = 6, "JULHO" = 7, "AGOSTO" = 8, "SETEMBRO" = 9, "OUTUBRO" = 10, "NOVEMBRO" = 11, "DEZEMBRO" = 12}
 
+CNPJ_ONLY_NUMBERS = true
+
 [development]

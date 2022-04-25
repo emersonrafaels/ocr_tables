@@ -44,15 +44,17 @@ class Execute_OCR():
 
 
     @staticmethod
-    def pos_processing_cnpj(text_input, pattern):
+    def pos_processing_cnpj(text_input, pattern, validator_only_numbers=False):
 
         """
 
             FORMATA O CNPJ OBTIDO DA CARTA DE FATURAMENTO
 
             # Arguments
-                text_input              - Required : Texto de input (String)
-                pattern                 - Required : Pattern de formatação a ser utilizado (String)
+                text_input                - Required : Texto de input (String)
+                pattern                   - Required : Pattern de formatação a ser utilizado (String)
+                validator_only_numbers    - Optional : Caso True, retorna o CNPJ apenas de forma numérica.
+                                                       Sem utilizar '-', '.', '/'. (Boolean)
 
             # Returns
                 result_cnpj             - Required : Resultado da formatação (String)
@@ -65,14 +67,19 @@ class Execute_OCR():
                                              repl="",
                                              string=text_input)
 
-            # FORMATANDO O CNPJ OBTIDO
-            result_cnpj = "{}.{}.{}/{}-{}".format(text_input_only_numbers[:2],
-                                                  text_input_only_numbers[2:5],
-                                                  text_input_only_numbers[5:8],
-                                                  text_input_only_numbers[8:12],
-                                                  text_input_only_numbers[12:])
+            if not validator_only_numbers:
 
-            return result_cnpj
+                # FORMATANDO O CNPJ OBTIDO
+                result_cnpj = "{}.{}.{}/{}-{}".format(text_input_only_numbers[:2],
+                                                      text_input_only_numbers[2:5],
+                                                      text_input_only_numbers[5:8],
+                                                      text_input_only_numbers[8:12],
+                                                      text_input_only_numbers[12:])
+
+                return result_cnpj
+
+            else:
+                return text_input_only_numbers
 
         except Exception as ex:
             execute_log.error("ERRO NA FUNÇÃO: {} - {}".format(stack()[0][3], ex))
@@ -320,7 +327,7 @@ class Execute_OCR():
 
         # FORMATANDO O RESULTADO OBTIDO - CNPJ
         json_result["cnpj_cliente"] = [Execute_OCR.pos_processing_cnpj(value[-1],
-                                                               settings.PATTERN_ONLY_NUMBERS) for value in list_result_cnpj]
+                                                                       settings.PATTERN_ONLY_NUMBERS, validator_only_numbers=settings.CNPJ_ONLY_NUMBERS) for value in list_result_cnpj]
 
         # OBTENDO A TABELA DE FATURAMENTO
         result_table = Execute_OCR.get_table_faturamento(self, result_ocr)
