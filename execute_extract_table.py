@@ -28,10 +28,9 @@ from dynaconf import settings
 
 from model_pre_processing import Image_Pre_Processing
 from UTILS.image_read import read_image_gray
-from UTILS import generic_functions
 import execute_log
-
-from UTILS.base64_encode_decode import base64_to_image
+from UTILS.base64_encode_decode import isbase64, base64_to_image
+from UTILS import generic_functions
 
 
 class Extract_Table():
@@ -70,13 +69,16 @@ class Extract_Table():
         input_type = None
 
         # VERIFICANDO SE O ARGUMENTO ENVIADO É UMA BASE64
-        if type(input_file) == bytes:
+        validator_base64, result_base64 = isbase64(input_file)
+
+        if validator_base64:
+
             # O INPUT É UMA BASE64
             # CHAMA-SE AQ FUNÇÃO PARA DECODIFICAR A BASE64
 
             input_type = "BYTES"
 
-            return input_type, [base64_to_image(input_file)]
+            return input_type, [base64_to_image(result_base64)]
 
         # VERIFICANDO SE O ARGUMENTO ENVIADO É O CAMINHO DE UM ARQUIVO
         elif str(input_file).find(".") != -1:

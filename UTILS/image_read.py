@@ -68,7 +68,7 @@ def read_image_rgb(image_path):
     except Exception as ex:
         print("ERRO NA FUNÇÃO: {} - {}".format(stack()[0][3], ex))
 
-    return img
+    return image
 
 
 def realiza_leitura_imagem(caminho_imagem):
