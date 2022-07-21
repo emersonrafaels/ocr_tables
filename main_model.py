@@ -34,8 +34,11 @@ def orchestra_extract_table_ocr(files):
     result_ocr = ""
     json_result = {}
 
-    # EXECUTANDO A PIPELINE PARA BUSCA E EXTRAÇÃO DAS TABELAS
-    results = Extract_Table().main_extract_table(files)
+    # VALIDANDO SE DEVE HAVER EXTRAÇÃO DAS TABELAS
+    if settings.VALIDATOR_EXTRACT_TABLE:
+
+        # EXECUTANDO A PIPELINE PARA BUSCA E EXTRAÇÃO DAS TABELAS
+        results = Extract_Table().main_extract_table(files)
 
     for image, tables in results:
 

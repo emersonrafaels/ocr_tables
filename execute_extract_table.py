@@ -167,11 +167,14 @@ class Extract_Table():
                 # CASO ENCONTROU TABELAS
                 if len(tables) > 0:
 
+                    # DEFININDO O DIRETÓRIO PARA SAVE DAS TABELAS
+                    dir_save_tables = os.path.join(directory,
+                                                    filename_without_extension)
+
+                    execute_log.info("SALVANDO TABELAS EM: {}".format(dir_save_tables))
+
                     # CRIANDO O DIRETÓRIO PARA SALVAR AS TABELAS ENCONTRADAS
-                    # NOVO_DIRETORIO = DIRETORIO/NOME_DO_ARQUIVO
-                    os.makedirs(os.path.join(directory,
-                                             filename_without_extension),
-                                exist_ok=True)
+                    os.makedirs(dir_save_tables, exist_ok=True)
 
                     # PERCORRENDO TODAS AS TABELAS ENCONTRADAS
                     for idx_table, table in enumerate(tables):
@@ -180,26 +183,22 @@ class Extract_Table():
                         table_filename = "{}{}{}".format("table_", idx_table, ".png")
 
                         # DEFININDO O DIRETÓRIO E NOME DE SAVE
-                        table_filepath = os.path.join(
-                            directory, filename_without_extension, table_filename
-                        )
+                        table_filepath = os.path.join(dir_save_tables,
+                                                      table_filename)
 
                         # SALVANDO A IMAGEM
                         cv2.imwrite(table_filepath, table)
 
-                        # ARMAZENANDO NA LISTA DE TABELAS SALVAS
-                        # PERMITINDO USO POSTERIOR NO OCR
-                        list_result_tables.append(table_filepath)
-
                         # ARMAZENANDO O RESULTADO
                         # ARQUIVO DE INPUT (file)
                         # TABELAS OBTIDAS (list_result_tables)
-                        results.append((image_file, list_result_tables))
+                        results.append({"image_file": image_file, "table": table_filepath})
 
-                        execute_log.info("TABELA - {} SALVA COM SUCESSO".format(idx_table))
+                        execute_log.info("TABELA - {} SALVA COM SUCESSO - {}".format(table_filename,
+                                                                                     table_filepath))
 
                 # CASO NÃO ENCONTROU TABELAS
                 else:
-                    results.append((image_file, [None]))
+                    results.append({"image_file": image_file, "table": None})
 
             return results
