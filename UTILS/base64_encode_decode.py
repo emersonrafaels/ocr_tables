@@ -118,7 +118,8 @@ def base64_to_image(file_base64):
 
     """
 
-    # FORMATANDO O NOME DE SAVE DO ARQUIVO PNG
+    # INICIANDO O NOME E DIR DE SAVE DO ARQUIVO RESULTANTE
+    # CONVERSÃO BASE64 TO IMAGE
     built_image = None
 
     try:
