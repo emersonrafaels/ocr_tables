@@ -19,15 +19,12 @@ __data_atualizacao__ = "08/03/2022"
 
 import base64
 from inspect import stack
-import imghdr
 import mimetypes
-import os
-from pathlib import Path
 from tempfile import NamedTemporaryFile
 
 import magic
 
-import execute_log
+from app import execute_log
 
 
 def base64_get_extension(file_base64_decode):

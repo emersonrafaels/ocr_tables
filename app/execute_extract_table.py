@@ -26,11 +26,20 @@ import os
 import cv2
 from dynaconf import settings
 
-from model_pre_processing import Image_Pre_Processing
-from UTILS.image_read import read_image_gray
-import execute_log
-from UTILS.base64_encode_decode import isbase64, base64_to_image
-from UTILS import generic_functions
+
+try:
+    import execute_log
+    from model_pre_processing import Image_Pre_Processing
+    from src.UTILS.image_read import read_image_gray
+    from src.UTILS.base64_encode_decode import isbase64, base64_to_image
+    from src.UTILS import generic_functions
+except ModuleNotFoundError:
+    sys.path.append(path.join(str(Path(__file__).resolve().parent.parent), "app"))
+    import execute_log
+    from model_pre_processing import Image_Pre_Processing
+    from src.UTILS.image_read import read_image_gray
+    from src.UTILS.base64_encode_decode import isbase64, base64_to_image
+    from src.UTILS import generic_functions
 
 
 class Extract_Table():
@@ -201,4 +210,4 @@ class Extract_Table():
                 else:
                     results.append({"image_file": image_file, "table": None})
 
-            return results
+        return results

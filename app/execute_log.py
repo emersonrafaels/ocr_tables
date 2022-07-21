@@ -31,7 +31,7 @@ from pathlib import Path
 
 from dynaconf import settings
 
-from UTILS.generic_functions import create_path, verify_exists
+from app.src.UTILS.generic_functions import create_path, verify_exists
 
 
 def configure_logging(dir_save_logs):

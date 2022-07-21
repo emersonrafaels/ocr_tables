@@ -28,9 +28,9 @@ import re
 from dynaconf import settings
 
 import execute_log
-from UTILS.image_ocr import ocr_functions
-from UTILS.extract_infos import get_matchs_strings, get_matchs_line
-from UTILS.generic_functions import convert_text_unidecode, verify_find_intersection
+from src.UTILS.image_ocr import ocr_functions
+from src.UTILS.extract_infos import get_matchs_line
+from src.UTILS.generic_functions import convert_text_unidecode, verify_find_intersection
 
 
 class Execute_OCR():

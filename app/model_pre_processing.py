@@ -28,9 +28,8 @@ from inspect import stack
 import cv2
 from dynaconf import settings
 
-from UTILS.generic_functions import get_date_time_now
-from UTILS.image_view import image_view_functions
-import execute_log
+from app.src.UTILS.generic_functions import get_date_time_now
+from app import execute_log
 
 
 class Image_Pre_Processing(object):

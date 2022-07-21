@@ -18,9 +18,9 @@ __data_atualizacao__ = "22/03/2022"
 import cv2
 import pytesseract
 
-from UTILS.generic_functions import converte_int
-from UTILS.image_view import image_view_functions
-from UTILS.image_read import read_image_gray
+from app.src.UTILS.generic_functions import converte_int
+from app.src.UTILS.image_view import image_view_functions
+from app.src.UTILS.image_read import read_image_gray
 
 # CONFIGURANDO O TESSERACT
 pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'

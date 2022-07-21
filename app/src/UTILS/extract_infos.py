@@ -1,6 +1,12 @@
 from inspect import stack
 import re
 
+try:
+    from src.UTILS.check_similarity import Check_Similarity
+except ModuleNotFoundError:
+    sys.path.append(path.join(str(Path(__file__).resolve().parent.parent), "app"))
+    from src.UTILS.check_similarity import Check_Similarity
+
 
 def applied_validate_filter(match_analysis, filters_validate):
 

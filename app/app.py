@@ -19,11 +19,24 @@ __author__ = """Emerson V. Rafael (EMERVIN)"""
 __data_atualizacao__ = "22/03/2022"
 
 
+import sys
+from os import path
+from pathlib import Path
+
 from dynaconf import settings
 
-from execute_extract_table import Extract_Table
-from execute_ocr import Execute_OCR
-import execute_log
+try:
+    from src.CONFIG import config
+    from execute_extract_table import Extract_Table
+    from execute_ocr import Execute_OCR
+    import execute_log
+except ModuleNotFoundError:
+    sys.path.append(path.join(str(Path(__file__).resolve().parent.parent), "app"))
+    from src.CONFIG import config
+    from execute_extract_table import Extract_Table
+    from execute_ocr import Execute_OCR
+    import execute_log
+
 
 def orchestra_extract_table_ocr(files):
 
@@ -40,10 +53,11 @@ def orchestra_extract_table_ocr(files):
         # EXECUTANDO A PIPELINE PARA BUSCA E EXTRAÇÃO DAS TABELAS
         results = Extract_Table().main_extract_table(files)
 
-    for image, tables in results:
+    for result in results:
 
         # EXECUTANDO O OCR
-        result_ocr, json_result = Execute_OCR().execute_pipeline_ocr(image, tables[0])
+        result_ocr, json_result = Execute_OCR().execute_pipeline_ocr(result["image_file"],
+                                                                     result["table"])
 
         print("RESULTADO OBTIDO:\n{}".format(result_ocr))
         print("JSON_RESULT:\n{}".format(json_result))
