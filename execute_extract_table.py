@@ -5,7 +5,7 @@
     1) APLICA TÉCNICAS DE PRÉ PROCESSAMENTO
     PARA DISTINGUIR TABELA DO RESTANTE DA IMAGEM
     2) ENCONTRANDO TABELAS
-    3) EXTRAÇÃO DE TABELAS
+        3) EXTRAÇÃO DE TABELAS
 
     # Arguments
         object                  - Required : Imagem para aplicação da tabela e OCR (Base64 | Path | Numpy Array)
@@ -65,6 +65,8 @@ class Extract_Table():
 
         """
 
+        execute_log.info("INICIANDO PROCESSO DE OBTENÇÃO DO ARQUIVO")
+
         # INICIANDO A VARIÁVEL QUE ARMAZENARÁ O TIPO DE INPUT
         input_type = None
 
@@ -78,6 +80,8 @@ class Extract_Table():
 
             input_type = "BYTES"
 
+            execute_log.info("INICIANDO PROCESSO DE OBTENÇÃO DO ARQUIVO - {}".format(input_type))
+
             return input_type, [base64_to_image(result_base64)]
 
         # VERIFICANDO SE O ARGUMENTO ENVIADO É O CAMINHO DE UM ARQUIVO
@@ -85,6 +89,8 @@ class Extract_Table():
             # O INPUT É UM ARQUIVO
 
             input_type = "ARCHIVE"
+
+            execute_log.info("INICIANDO PROCESSO DE OBTENÇÃO DO ARQUIVO - {}".format(input_type))
 
             return input_type, [input_file]
 
@@ -94,6 +100,8 @@ class Extract_Table():
             # O RETORNO É BASE64
             input_type = "BYTES"
 
+            execute_log.info("INICIANDO PROCESSO DE OBTENÇÃO DO ARQUIVO - {}".format(input_type))
+
             return input_type, [base64_to_image(file) for file in input_file if type(file) == bytes]
 
         else:
@@ -101,6 +109,8 @@ class Extract_Table():
             # CHAMA-SE A FUNÇÃO PARA OBTER TODOS OS ARQUIVOS NO DIRETÓRIO
 
             input_type = "DIRECTORY"
+
+            execute_log.info("INICIANDO PROCESSO DE OBTENÇÃO DO ARQUIVO - {}".format(input_type))
 
             return input_type, generic_functions.get_files_directory(input_file,
                                                                      settings.FORMAT_TYPES_ACCEPTED)
@@ -126,6 +136,8 @@ class Extract_Table():
         # INICIANDO A VARIÁVEL QUE ARMAZENARÁ OS RESULTADOS (TABELAS ENCONTRADAS)
         results = []
 
+        execute_log.info("INICIANDO FLUXO DE EXTRAÇÃO DE TABELAS")
+
         # VERIFICANDO O TIPO DE ENVIO
         input_type, list_images = Extract_Table.orchestra_get_files(input_images)
 
@@ -145,45 +157,49 @@ class Extract_Table():
             # LEITURA EM ESCALA DE CINZA
             image = read_image_gray(image_file)
 
-            # OBTENDO AS TABELAS CONTIDAS NA IMAGEM
-            tables = Image_Pre_Processing().find_tables(image)
+            if image is not None:
 
-            # CASO ENCONTROU TABELAS
-            if len(tables) > 0:
+                execute_log.info("IMAGEM LIDA COM SUCESSO")
 
-                # CRIANDO O DIRETÓRIO PARA SALVAR AS TABELAS ENCONTRADAS
-                # NOVO_DIRETORIO = DIRETORIO/NOME_DO_ARQUIVO
-                os.makedirs(os.path.join(directory,
-                                         filename_without_extension),
-                            exist_ok=True)
+                # OBTENDO AS TABELAS CONTIDAS NA IMAGEM
+                tables = Image_Pre_Processing().find_tables(image)
 
-                # PERCORRENDO TODAS AS TABELAS ENCONTRADAS
-                for idx_table, table in enumerate(tables):
+                # CASO ENCONTROU TABELAS
+                if len(tables) > 0:
 
-                    # DEFININDO O NOME DA TABELA A SER SALVA (FORMATO PNG)
-                    table_filename = "{}{}{}".format("table_", idx_table, ".png")
+                    # CRIANDO O DIRETÓRIO PARA SALVAR AS TABELAS ENCONTRADAS
+                    # NOVO_DIRETORIO = DIRETORIO/NOME_DO_ARQUIVO
+                    os.makedirs(os.path.join(directory,
+                                             filename_without_extension),
+                                exist_ok=True)
 
-                    # DEFININDO O DIRETÓRIO E NOME DE SAVE
-                    table_filepath = os.path.join(
-                        directory, filename_without_extension, table_filename
-                    )
+                    # PERCORRENDO TODAS AS TABELAS ENCONTRADAS
+                    for idx_table, table in enumerate(tables):
 
-                    # SALVANDO A IMAGEM
-                    cv2.imwrite(table_filepath, table)
+                        # DEFININDO O NOME DA TABELA A SER SALVA (FORMATO PNG)
+                        table_filename = "{}{}{}".format("table_", idx_table, ".png")
 
-                    # ARMAZENANDO NA LISTA DE TABELAS SALVAS
-                    # PERMITINDO USO POSTERIOR NO OCR
-                    list_result_tables.append(table_filepath)
+                        # DEFININDO O DIRETÓRIO E NOME DE SAVE
+                        table_filepath = os.path.join(
+                            directory, filename_without_extension, table_filename
+                        )
 
-                    # ARMAZENANDO O RESULTADO
-                    # ARQUIVO DE INPUT (file)
-                    # TABELAS OBTIDAS (list_result_tables)
-                    results.append((image_file, list_result_tables))
+                        # SALVANDO A IMAGEM
+                        cv2.imwrite(table_filepath, table)
 
-                    execute_log.info("TABELA - {} SALVA COM SUCESSO".format(idx_table))
+                        # ARMAZENANDO NA LISTA DE TABELAS SALVAS
+                        # PERMITINDO USO POSTERIOR NO OCR
+                        list_result_tables.append(table_filepath)
 
-            # CASO NÃO ENCONTROU TABELAS
-            else:
-                results.append((image_file, [None]))
+                        # ARMAZENANDO O RESULTADO
+                        # ARQUIVO DE INPUT (file)
+                        # TABELAS OBTIDAS (list_result_tables)
+                        results.append((image_file, list_result_tables))
 
-        return results
+                        execute_log.info("TABELA - {} SALVA COM SUCESSO".format(idx_table))
+
+                # CASO NÃO ENCONTROU TABELAS
+                else:
+                    results.append((image_file, [None]))
+
+            return results

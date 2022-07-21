@@ -22,6 +22,8 @@ from inspect import stack
 import imghdr
 import mimetypes
 import os
+from pathlib import Path
+from tempfile import NamedTemporaryFile
 
 import magic
 
@@ -117,24 +119,35 @@ def base64_to_image(file_base64):
     """
 
     # FORMATANDO O NOME DE SAVE DO ARQUIVO PNG
-    built_image = os.path.join(os.getcwd(), "INPUT_BASE64.PNG")
+    built_image = None
 
-    # REALIZANDO A ABERTURA DE UM ARQUIVO (QUE SERÁ ESCRITO NA MÁQUINA)
-    with open(built_image, "wb") as image_base64:
+    try:
+        # DECODOFICANDO A BASE64
+        result_decode = base64.b64decode(file_base64.decode())
 
-        try:
-            # DECODOFICANDO A BASE64, ARMAZENANDO-O NO OBJETO ABERTO
-            # ESCREVENDO NA MÁQUINA
+        execute_log.info("BASE64 DECODIFICADA COM SUCESSO")
 
-            result_decode = base64.b64decode(file_base64.decode())
+        # OBTENDO A EXTENSÃO DO ARQUIVO
+        extension = base64_get_extension(result_decode)
 
-            # OBTENDO A EXTENSÃO DO ARQUIVO
-            extension = base64_get_extension(result_decode)
+        execute_log.info("BASE64 - EXTENSÃO: {}".format(extension))
 
-            image_base64.write(result_decode)
+        # REALIZANDO A ABERTURA DE UM ARQUIVO (QUE SERÁ ESCRITO NA MÁQUINA)
+        with NamedTemporaryFile(suffix=extension, delete=False) as temp_file:
 
-        except Exception as ex:
-            execute_log.error("ERRO NA FUNÇÃO {} - {]".format(stack()[0][3], ex))
+            try:
+                temp_file.write(result_decode)
+
+                # SOBREESCREVENDO O VALOR DO BUILT_IMAGE
+                built_image = temp_file.name
+
+                execute_log.info("ARQUIVO SALVO EM: {}".format(built_image))
+
+            except Exception as ex:
+                execute_log.error("ERRO NA FUNÇÃO {} - {]".format(stack()[0][3], ex))
+
+    except Exception as ex:
+        execute_log.error("ERRO NA FUNÇÃO {} - {]".format(stack()[0][3], ex))
 
     return built_image
 

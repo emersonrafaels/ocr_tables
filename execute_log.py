@@ -21,20 +21,20 @@ __version__ = "2.0"
 __author__ = """Patricia Catandi (CATANDI) & Oscar Bedoya (BEDOYAO) & Edson Mano (EDDANSA) &
                 Lucas Menegheso (MENEFAR) & Fabio Andre Sonza (SONZAFA) & 
                 Rafael Barbosa Ferreira (RBFRDTH) & Felipe Gomes Luttzolff (LUTTZOL) &
-                Emerson V. Rafael (EMERVIN) & Henrique Fantinatti (HENRFAN)"""
+                Emerson V. Rafael (EMERVIN)"""
 
-from datetime import datetime
+
 from inspect import stack
 import logging
 from os import path
-import time
+from pathlib import Path
 
 from dynaconf import settings
 
-from UTILS.generic_functions import get_date_time_now, create_path, verify_exists
+from UTILS.generic_functions import create_path, verify_exists
 
 
-def configure_logging():
+def configure_logging(dir_save_logs):
 
     """
 
@@ -45,6 +45,7 @@ def configure_logging():
             - MANIPULADORES DE LOGS - CONSOLE (TELA DO USUÁRIO)
 
         # Arguments
+            dir_save_logs       - Required : Diretório para save dos logs (DirectoryPath)
 
         # Returns
             validador            - Required : Validador da função (Boolean)
@@ -68,7 +69,7 @@ def configure_logging():
             if not len(logger.handlers):
 
                 # DEFININDO O LOCAL DO ARQUIVO DE LOG
-                dir_filename = path.join(settings.DIR_SAVE_LOGS, settings.LOG_FILENAME)
+                dir_filename = path.join(dir_save_logs, settings.LOG_FILENAME)
 
                 # CRIANDO OS MANIPULADORES DE LOGS - ARQUIVO DE LOG
                 fh = logging.FileHandler(dir_filename)
@@ -120,18 +121,21 @@ def startLog():
     # INICIANDO O VALIDADOR DA FUNÇÃO
     validador = False
 
+    # OBTENDO O DIR SAVE LOGS
+    dir_save_logs = path.join(Path(__file__).resolve().parent, settings.DIR_SAVE_LOGS)
+
     # VERIFICANDO SE O DIRETÓRIO DE SAVE DOS LOGS EXISTE
-    validador = verify_exists(settings.DIR_SAVE_LOGS)
+    validador = verify_exists(dir_save_logs)
 
     if validador is False:
 
         # CRIANDO O DIRETÓRIO DE SAVE DOS LOGS
-        validador = create_path(settings.DIR_SAVE_LOGS)
+        validador = create_path(dir_save_logs)
 
     if validador:
 
         # CONFIGURANDO O USO DA LOGGING (REGISTRANDO NO ARQUIVO DE LOG E NO CONSOLE)
-        validador = configure_logging()
+        validador = configure_logging(dir_save_logs=dir_save_logs)
 
     return validador
 
