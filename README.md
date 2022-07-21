@@ -30,7 +30,7 @@
 
 ## 💻 Sobre o projeto
 
-📦 **OCR TABLES** é um projeto para **Extração de tabela e OCR sobre elas**
+📦 **OCR TABLES** é um projeto para **Extração de tabela contidas em uma imagem e OCR sobre elas**
 
 Atualmente funcionando para:
 
