@@ -1,4 +1,7 @@
 from inspect import stack
+import sys
+from os import path
+from pathlib import Path
 import re
 
 try:
@@ -127,3 +130,71 @@ def get_matchs_strings(text, field_pattern, filters_validate=[]):
 
     return matchs_text
 
+def decorator_valid_similarity(func):
+
+    """
+
+        ORQUESTRA A CHAMADA DA FUNÇÃO DE CÁLCULO DE SIMILARIDADE ITEM A ITEM.
+
+        # Arguments
+            search                     - Required : Palavra a ser comparada
+                                                    ou utilizada como base para obter
+                                                    as similaridades
+                                                    dentre as possibilidades (String)
+
+            list_choices               - Required : Palavra ser comparada com a query ou a lista
+                                                    de palavras a serem comparadas
+                                                    com a query (String | List)
+
+            percent_match              - Required : Somente serão retornados
+                                                    os itens acima do
+                                                    percentual de match (Integer)
+
+            pre_processing             - Optional : Definindo se deve haver
+                                                    pré processamento (Boolean)
+
+            limit                      - Optional : Limite de resultados
+                                                    de similaridade (Integer)
+
+        # Returns
+            percentual_similarity      - Required : Percentual de similaridade (String | List)
+
+    """
+
+
+    def valid_value_similarity(self, search, list_choices, percent_match, pre_processing, limit):
+
+        # INICIANDO A VARIÁVEL QUE ARMAZENARÁ O RESULTADO DE SIMILARIDADES
+        # APÓS FILTRO POR PERCENTUAL DE MATCH ESPERADO
+        result_valid_similarity = []
+        validator_similarity = False
+
+        # VALIDANDO O LIMITE ENVIADO
+        if limit is False:
+            limit = None
+
+        try:
+            # OBTENDO AS SIMILARIDADES ENTRE O ITEM PROCURADO E A LISTA DE ITENS
+            result_similarity = Check_Similarity.get_values_similarity(query=search,
+                                                                       choices=list_choices,
+                                                                       pre_processing=pre_processing,
+                                                                       limit=limit)
+
+            # VALIDANDO OS ITENS QUE ESTÃO ACIMA DO PERCENTUAL DE SIMILARIDADE ENVIADO
+            result_valid_similarity = [value for value in result_similarity if value[1] > percent_match]
+
+            if len(result_valid_similarity) > 0:
+                validator_similarity = True
+
+        except Exception as ex:
+            print("ERRO NA FUNÇÃO {} - {}".format(stack()[0][3], ex))
+
+        return validator_similarity, result_valid_similarity
+
+    return valid_value_similarity
+
+
+@decorator_valid_similarity
+def get_similitary(self):
+
+    pass

@@ -53,14 +53,11 @@ def orchestra_extract_table_ocr(files):
         # EXECUTANDO A PIPELINE PARA BUSCA E EXTRAÇÃO DAS TABELAS
         results = Extract_Table().main_extract_table(files)
 
-    for result in results:
+    # EXECUTANDO O OCR
+    result_ocr, json_result = Execute_OCR().execute_pipeline_ocr(results)
 
-        # EXECUTANDO O OCR
-        result_ocr, json_result = Execute_OCR().execute_pipeline_ocr(result["image_file"],
-                                                                     result["table"])
-
-        print("RESULTADO OBTIDO:\n{}".format(result_ocr))
-        print("JSON_RESULT:\n{}".format(json_result))
+    print("RESULTADO OBTIDO:\n{}".format(result_ocr))
+    print("JSON_RESULT:\n{}".format(json_result))
 
 
     return result_ocr, json_result

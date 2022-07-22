@@ -29,7 +29,7 @@ from dynaconf import settings
 
 import execute_log
 from src.UTILS.image_ocr import ocr_functions
-from src.UTILS.extract_infos import get_matchs_line
+from src.UTILS.extract_infos import get_matchs_line, get_similarity
 from src.UTILS.generic_functions import convert_text_unidecode, verify_find_intersection
 
 
@@ -41,6 +41,15 @@ class Execute_OCR():
         self.list_values_months_abrev = list(settings.DICT_MONTHS_ABREV.keys())
         self.list_values_months_complete = list(settings.DICT_MONTHS_COMPLETE.keys())
         self.list_values_months = self.list_values_months_abrev + self.list_values_months_complete
+
+        # 2 - INICIANDO OS PERCENTUAIS DE MATCH
+        self.default_percent_match = settings.DEFAULT_PERCENTUAL_MATCH
+
+        # 3 - DEFININDO SE DEVE HAVER PRÉ PROCESSAMENTO DOS ITENS ANTES DO CÁLCULO DE SEMELHANÇA
+        self.similarity_pre_processing = settings.DEFAULT_PRE_PROCESSING
+
+        # 4 - INICIANDO A VARIÁVEL QUE CONTÉM O LIMIT NA CHAMADA DE MÁXIMAS SIMILARIDADES
+        self.limit_result_best_similar = settings.DEFAULT_LIMIT_RESULT_BEST_SIMILAR
 
 
     @staticmethod
@@ -290,7 +299,7 @@ class Execute_OCR():
         return result_values_faturamentos_list, result_years, result_months, result_values_faturamentos
 
 
-    def execute_pipeline_ocr(self, dir_full_image, dir_table_image):
+    def execute_pipeline_ocr(self, result_tables):
 
         """
 
@@ -301,12 +310,12 @@ class Execute_OCR():
             E SOBRE AS TABELAS (SE ENCONTRADAS) (dir_table_image).
 
             # Arguments
-                dir_full_image              - Required : Caminho ds imagem completa (String)
-                dir_table_image             - Required : Caminho dss tabelas encontradas (String)
+                result_tables               - Required : Imagem e suas tabelas (List)
 
             # Returns
                 validador                   - Required : Validador de execução da função (Boolean)
-                retorno_ocr                 - Required : Retorno do OCR (String | Dict)
+                result_ocr                  - Required : Retorno do OCR (String | Dict)
+                json_result                 - Required : Resultado das informações do DAC (Dict)
 
         """
 
@@ -316,30 +325,32 @@ class Execute_OCR():
         json_result["cnpj_cliente"] = ""
         json_result["tabela_valores"] = ""
 
-        # REALIZANDO O OCR SOBRE A IMAGEM
-        result_ocr = ocr_functions(dir_full_image).Orquestra_OCR()
+        for result in result_tables:
 
-        # FORMATANDO O RESULTADO DO OCR
-        result_ocr = convert_text_unidecode(result_ocr).upper()
+            # REALIZANDO O OCR SOBRE A IMAGEM
+            result_ocr = ocr_functions(result["image_file"]).Orquestra_OCR()
 
-        # OBTENDO - CNPJ
-        list_result_cnpj = get_matchs_line(result_ocr, settings.PATTERN_CNPJ)
+            # FORMATANDO O RESULTADO DO OCR
+            result_ocr = convert_text_unidecode(result_ocr).upper()
 
-        # FORMATANDO O RESULTADO OBTIDO - CNPJ
-        json_result["cnpj_cliente"] = [Execute_OCR.pos_processing_cnpj(value[-1],
-                                                                       settings.PATTERN_ONLY_NUMBERS, validator_only_numbers=settings.CNPJ_ONLY_NUMBERS) for value in list_result_cnpj]
+            # OBTENDO - CNPJ
+            list_result_cnpj = get_matchs_line(result_ocr, settings.PATTERN_CNPJ)
 
-        # OBTENDO A TABELA DE FATURAMENTO
-        result_table = Execute_OCR.get_table_faturamento(self, result_ocr)
+            # FORMATANDO O RESULTADO OBTIDO - CNPJ
+            json_result["cnpj_cliente"] = [Execute_OCR.pos_processing_cnpj(value[-1],
+                                                                           settings.PATTERN_ONLY_NUMBERS, validator_only_numbers=settings.CNPJ_ONLY_NUMBERS) for value in list_result_cnpj]
 
-        # REALIZANDO O PÓS PROCESSAMENTO DA TABELA DE FATURAMENTO
-        Execute_OCR.pos_processing_faturamento(self, result_table)
+            # OBTENDO A TABELA DE FATURAMENTO
+            result_table = Execute_OCR.get_table_faturamento(self, result_ocr)
 
-        # FORMATANDO O RESULTADO OBTIDO - TABELA DE FATURAMENTO
-        json_result["tabela_valores"], \
-        result_years, \
-        result_months, \
-        result_values_faturamento = Execute_OCR.get_result_faturamento(result_table,
-                                                                       settings.REGEX_ONLY_LETTERS_NUMBERS_DOT_BARS_DASHES_COMMA)
+            # REALIZANDO O PÓS PROCESSAMENTO DA TABELA DE FATURAMENTO
+            Execute_OCR.pos_processing_faturamento(self, result_table)
+
+            # FORMATANDO O RESULTADO OBTIDO - TABELA DE FATURAMENTO
+            json_result["tabela_valores"], \
+            result_years, \
+            result_months, \
+            result_values_faturamento = Execute_OCR.get_result_faturamento(result_table,
+                                                                           settings.REGEX_ONLY_LETTERS_NUMBERS_DOT_BARS_DASHES_COMMA)
 
         return result_ocr, json_result
