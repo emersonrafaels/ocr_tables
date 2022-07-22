@@ -2,7 +2,8 @@ from inspect import stack
 import sys
 from os import path
 from pathlib import Path
-import re
+
+import regex as re
 
 try:
     from src.UTILS.check_similarity import Check_Similarity
@@ -81,7 +82,9 @@ def get_matchs_line(text, field_pattern, filters_validate=[]):
                 if applied_validate_filter(match[0], filters_validate):
 
                     # REALIZANDO O MATCH
-                    matchs_strings.append([text_line, match.start(), match.end(), match[0]])
+                    matchs_strings.append([text_line, match.start(),
+                                           match.end(), match[0],
+                                           match.fuzzy_counts])
 
     except Exception as ex:
         print("ERRO NA FUNÇÃO: {} - {}".format(stack()[0][3], ex))
@@ -123,12 +126,16 @@ def get_matchs_strings(text, field_pattern, filters_validate=[]):
             if applied_validate_filter(match[0], filters_validate):
 
                 # REALIZANDO O MATCH
-                matchs_text.append([match.start(), match.end(), match[0]])
+                matchs_text.append([match.start(),
+                                    match.end(),
+                                    match[0],
+                                    match.fuzzy_counts])
 
     except Exception as ex:
         print("ERRO NA FUNÇÃO: {} - {}".format(stack()[0][3], ex))
 
     return matchs_text
+
 
 def decorator_valid_similarity(func):
 
@@ -162,7 +169,7 @@ def decorator_valid_similarity(func):
     """
 
 
-    def valid_value_similarity(self, search, list_choices, percent_match, pre_processing, limit):
+    def valid_value_similarity(search, list_choices, percent_match, pre_processing, limit):
 
         # INICIANDO A VARIÁVEL QUE ARMAZENARÁ O RESULTADO DE SIMILARIDADES
         # APÓS FILTRO POR PERCENTUAL DE MATCH ESPERADO
@@ -195,6 +202,6 @@ def decorator_valid_similarity(func):
 
 
 @decorator_valid_similarity
-def get_similitary(self):
+def get_similitary():
 
     pass
