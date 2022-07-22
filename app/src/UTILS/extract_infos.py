@@ -82,8 +82,10 @@ def get_matchs_line(text, field_pattern, filters_validate=[]):
                 if applied_validate_filter(match[0], filters_validate):
 
                     # REALIZANDO O MATCH
-                    matchs_strings.append([text_line, match.start(),
-                                           match.end(), match[0],
+                    matchs_strings.append([text_line,
+                                           match.start(),
+                                           match.end(),
+                                           match[0],
                                            match.fuzzy_counts])
 
     except Exception as ex:
