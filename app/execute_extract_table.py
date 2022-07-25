@@ -22,6 +22,8 @@ __data_atualizacao__ = "22/03/2022"
 
 
 import os
+from pathlib import Path
+import sys
 
 import cv2
 from dynaconf import settings
