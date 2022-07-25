@@ -31,6 +31,7 @@ import execute_log
 from src.UTILS.image_ocr import ocr_functions
 from src.UTILS.extract_infos import get_matchs_line, get_similitary
 from src.UTILS.generic_functions import convert_text_unidecode, verify_find_intersection
+from src.PROCESSINGS.model_pre_processing import Image_Pre_Processing
 
 
 class Execute_OCR():
@@ -320,37 +321,52 @@ class Execute_OCR():
         """
 
         # INICIANDO AS VARIÁVEIS RESULTANTES
-        result_ocr = ""
+        dict_images = {}
         json_result = {}
         json_result["cnpj_cliente"] = ""
         json_result["tabela_valores"] = ""
 
         for result in result_tables:
 
+            if settings.PRE_PROC_IMAGE:
+                # REALIZANDO O PRÉ PROCESSAMENTO DA IMAGEM
+                image_pre_processing = Image_Pre_Processing().orchestra_pre_processing(result["image_file"])
+
+                # REALIZANDO O OCR SOBRE A IMAGEM
+                text_ocr_pre_processing = ocr_functions(type_return_ocr_input="TEXTO").Orquestra_OCR(image_pre_processing)
+
+                # SALVANDO O TEXTO OBTIDO
+                dict_images["PRE_PROCESSING"] = text_ocr_pre_processing
+
             # REALIZANDO O OCR SOBRE A IMAGEM
-            result_ocr = ocr_functions(result["image_file"]).Orquestra_OCR()
+            text_ocr = ocr_functions(type_return_ocr_input="TEXTO").Orquestra_OCR(result["image_file"])
 
-            # FORMATANDO O RESULTADO DO OCR
-            result_ocr = convert_text_unidecode(result_ocr).upper()
+            # SALVANDO O TEXTO OBTIDO
+            dict_images["IMG_ORIGINAL"] = text_ocr
 
-            # OBTENDO - CNPJ
-            list_result_cnpj = get_matchs_line(result_ocr, settings.PATTERN_CNPJ)
+            for idx, image in enumerate(dict_images):
 
-            # FORMATANDO O RESULTADO OBTIDO - CNPJ
-            json_result["cnpj_cliente"] = [Execute_OCR.pos_processing_cnpj(value[-1],
-                                                                           settings.PATTERN_ONLY_NUMBERS, validator_only_numbers=settings.CNPJ_ONLY_NUMBERS) for value in list_result_cnpj]
+                # FORMATANDO O RESULTADO DO OCR
+                result_ocr = convert_text_unidecode(dict_images[image]).upper()
 
-            # OBTENDO A TABELA DE FATURAMENTO
-            result_table = Execute_OCR.get_table_faturamento(self, result_ocr)
+                # OBTENDO - CNPJ
+                list_result_cnpj = get_matchs_line(result_ocr, settings.PATTERN_CNPJ)
 
-            # REALIZANDO O PÓS PROCESSAMENTO DA TABELA DE FATURAMENTO
-            Execute_OCR.pos_processing_faturamento(self, result_table)
+                # FORMATANDO O RESULTADO OBTIDO - CNPJ
+                json_result["cnpj_cliente"] = [Execute_OCR.pos_processing_cnpj(value[-1],
+                                                                               settings.PATTERN_ONLY_NUMBERS, validator_only_numbers=settings.CNPJ_ONLY_NUMBERS) for value in list_result_cnpj]
 
-            # FORMATANDO O RESULTADO OBTIDO - TABELA DE FATURAMENTO
-            json_result["tabela_valores"], \
-            result_years, \
-            result_months, \
-            result_values_faturamento = Execute_OCR.get_result_faturamento(result_table,
-                                                                           settings.REGEX_ONLY_LETTERS_NUMBERS_DOT_BARS_DASHES_COMMA)
+                # OBTENDO A TABELA DE FATURAMENTO
+                result_table = Execute_OCR.get_table_faturamento(self, result_ocr)
+
+                # REALIZANDO O PÓS PROCESSAMENTO DA TABELA DE FATURAMENTO
+                Execute_OCR.pos_processing_faturamento(self, result_table)
+
+                # FORMATANDO O RESULTADO OBTIDO - TABELA DE FATURAMENTO
+                json_result["tabela_valores"], \
+                result_years, \
+                result_months, \
+                result_values_faturamento = Execute_OCR.get_result_faturamento(result_table,
+                                                                               settings.REGEX_ONLY_LETTERS_NUMBERS_DOT_BARS_DASHES_COMMA)
 
         return result_ocr, json_result

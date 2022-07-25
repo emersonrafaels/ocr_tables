@@ -29,14 +29,14 @@ from dynaconf import settings
 
 try:
     import execute_log
-    from model_pre_processing import Image_Pre_Processing
+    from src.PROCESSINGS.model_pre_processing import Image_Pre_Processing
     from src.UTILS.image_read import read_image_gray
     from src.UTILS.base64_encode_decode import isbase64, base64_to_image
     from src.UTILS import generic_functions
 except ModuleNotFoundError:
     sys.path.append(path.join(str(Path(__file__).resolve().parent.parent), "app"))
     import execute_log
-    from model_pre_processing import Image_Pre_Processing
+    from src.PROCESSINGS.model_pre_processing import Image_Pre_Processing
     from src.UTILS.image_read import read_image_gray
     from src.UTILS.base64_encode_decode import isbase64, base64_to_image
     from src.UTILS import generic_functions

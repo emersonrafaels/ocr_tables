@@ -18,6 +18,7 @@ from inspect import stack
 
 import cv2
 import numpy as np
+import pandas as pd
 import matplotlib.pyplot as plt
 from PIL import ImageFont, ImageDraw, Image
 
@@ -31,7 +32,6 @@ class image_view_functions():
         # Arguments
             object                  - Required : Imagem para leitura/visualização (String | Object)
         # Returns
-
 
     """
 
@@ -72,7 +72,7 @@ class image_view_functions():
 
 
     @staticmethod
-    def view_image_with_coordinates(image, window_name="IMAGEM ATUAL"):
+    def view_image_with_coordinates(image, window_name="IMAGEM ATUAL", cmap=None):
 
         """
 
@@ -85,13 +85,15 @@ class image_view_functions():
                 window_name          - Required : Nome que será usada como
                                                   título da janela de exibição
                                                   da imagem (String)
+                cmap                 - Optional : Forma de disponibilização
+                                                  da imagem (Boolean | String)
             # Returns
 
         """
 
         try:
             # MOSTRANDO IMAGEM ATUAL
-            plt.imshow(image)
+            plt.imshow(image, cmap=cmap)
             plt.title(window_name)
 
             # AGUARDA A AÇÃO DO USUÁRIO DE FECHAR A JANELA DE IMAGEM
@@ -150,7 +152,6 @@ class image_view_functions():
             RECEBE AS POSIÇÕES X, Y (POSIÇÕES DE INICIO DA ESCRITA)
             RECEBE A LARGURA E ALTURA, PARA COMPLETAR A CAIXA.
 
-
             # Arguments
                 img                  - Required : Imagem a ser aplicada o texto (Object)
                 text                 - Required : Texto a ser escrito (String)
@@ -167,12 +168,14 @@ class image_view_functions():
         """
 
         try:
-            font = ImageFont.truetype(font, text_size)
+            # VERIFICANDO SE O VALOR TEXTUAL NÃO É NAN
+            if not pd.isna(text):
+                font = ImageFont.truetype(font, text_size)
 
-            img_pil = Image.fromarray(img)
-            draw = ImageDraw.Draw(img_pil)
-            draw.text((x, y), text, font=font, fill=color)
-            img = np.array(img_pil)
+                img_pil = Image.fromarray(img)
+                draw = ImageDraw.Draw(img_pil)
+                draw.text((x, y), text, font=font, fill=color)
+                img = np.array(img_pil)
         except Exception as ex:
             print(ex)
 
