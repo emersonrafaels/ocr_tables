@@ -34,6 +34,8 @@ from dynaconf import settings
 import numpy as np
 from PIL import Image
 
+from app.src.UTILS.image_read import read_image_gray
+
 
 def open_image_pil(image):
 
@@ -202,16 +204,14 @@ def orchestra_read_image(image):
             """
 
                 A IMAGEM ESTÁ EM FORMATO DE STRING
-                CONVERTE STRING -> PIL
+                CONVERTE STRING -> ARRAY
 
             """
 
             # APLICANDO O ENCODE UTF-8 NA IMAGEM (UNICODE)
-            imagem = str_to_base64(image)
-            img_pil = base64_to_pil(imagem)
+            imagem = read_image_gray(image)
 
-            if img_pil == "null":
-                img_pil = open_image_pil(imagem)
+            return imagem
 
 
         elif type(image) is np.ndarray:

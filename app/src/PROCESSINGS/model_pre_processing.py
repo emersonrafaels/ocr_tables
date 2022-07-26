@@ -30,6 +30,7 @@ from dynaconf import settings
 
 from app.src.UTILS.generic_functions import get_date_time_now
 from app import execute_log
+from app.src.UTILS.image_convert_format import orchestra_read_image
 
 
 class Image_Pre_Processing(object):
@@ -110,7 +111,8 @@ class Image_Pre_Processing(object):
                                     self.std_dev_x_direction,
                                     self.std_dev_y_direction)
 
-            execute_log.info("OCR TABLES - TÉCNICA DE DESFOQUE GAUSSIANO APLICADO COM SUCESSO - {}".format(get_date_time_now("%d/%m/%Y %H:%M:%S")))
+            execute_log.info("{} - TÉCNICA DE DESFOQUE GAUSSIANO APLICADO COM SUCESSO - {}".format(settings.APPNAME,
+                                                                                                   get_date_time_now("%d/%m/%Y %H:%M:%S")))
 
             validator = True
 
@@ -171,7 +173,8 @@ class Image_Pre_Processing(object):
                                            self.threshold_ksize,
                                            self.subtract_from_mean)
 
-            execute_log.info("OCR TABLES - TÉCNICA DE LIMIAR ADAPTATIVO APLICADO COM SUCESSO - {}".format(get_date_time_now("%d/%m/%Y %H:%M:%S")))
+            execute_log.info("{} - TÉCNICA DE LIMIAR ADAPTATIVO APLICADO COM SUCESSO - {}".format(settings.APPNAME,
+                                                                                                  get_date_time_now("%d/%m/%Y %H:%M:%S")))
 
             validator = True
 
@@ -205,16 +208,12 @@ class Image_Pre_Processing(object):
         # INICIANDO A VARIÁVEL DE RETORNO
         thresh = None
 
-        execute_log.info("OCR TABLES - INICIANDO O PRÉ PROCESSAMENTO DA IMAGEM - {}".format(get_date_time_now("%d/%m/%Y %H:%M:%S")))
+        execute_log.info("{} - INICIANDO O PRÉ PROCESSAMENTO DA IMAGEM - {}".format(settings.APPNAME,
+                                                                                    get_date_time_now("%d/%m/%Y %H:%M:%S")))
 
         try:
-            # REALIZANDO O DESFOQUE GAUSSIANO
-            validator, blur = Image_Pre_Processing.smoothing_blurring(self, img)
-
-            if validator:
-
-                # APLICANDO O LIMIAR PARA MELHOR SEPARAÇÃO DE PLANO PRINCIPAL E FUNDO
-                validator, thresh = Image_Pre_Processing.threshold_image(self, blur)
+            # APLICANDO O LIMIAR PARA MELHOR SEPARAÇÃO DE PLANO PRINCIPAL E FUNDO
+            validator, thresh = Image_Pre_Processing.threshold_image(self, img)
 
         except Exception as ex:
             execute_log.error("ERRO NA FUNÇÃO: {} - {}".format(stack()[0][3], ex))
@@ -246,7 +245,8 @@ class Image_Pre_Processing(object):
         # INICIANDO A VARIÁVEL DE RETORNO
         horizontally_dilated = vertically_dilated = None
 
-        execute_log.info("OCR TABLES - TÉCNICA DE TRANSFORMAÇÕES MORFOLÓGICAS - {}".format(get_date_time_now("%d/%m/%Y %H:%M:%S")))
+        execute_log.info("{} - TÉCNICA DE TRANSFORMAÇÕES MORFOLÓGICAS - {}".format(settings.APPNAME,
+                                                                                   get_date_time_now("%d/%m/%Y %H:%M:%S")))
 
         try:
             # OBTENDO O COMPRIMENTO E AMPLITUDE DA IMAGEM
@@ -301,7 +301,8 @@ class Image_Pre_Processing(object):
         # INICIANDO O VALIDADOR DA FUNÇÃO
         validator = False
 
-        execute_log.info("OCR TABLES - BUSCANDO O DOCUMENTO NA IMAGEM - {}".format(get_date_time_now("%d/%m/%Y %H:%M:%S")))
+        execute_log.info("{} - BUSCANDO O DOCUMENTO NA IMAGEM - {}".format(settings.APPNAME,
+                                                                           get_date_time_now("%d/%m/%Y %H:%M:%S")))
 
         try:
             # OBTENDO A MÁSCARA E OBTENDO OS CONTORNOS
@@ -346,7 +347,8 @@ class Image_Pre_Processing(object):
         # INICIANDO AS VARIÁVEIS QUE ARMAZENARÃO A LISTA DE CONTORNOS NA HORIZONTAL E VERTICAL
         images_cropped_contour = []
 
-        execute_log.info("OCR TABLES - CROPPANDO O DOCUMENTO NA IMAGEM - {}".format(get_date_time_now("%d/%m/%Y %H:%M:%S")))
+        execute_log.info("{} - CROPPANDO O DOCUMENTO NA IMAGEM - {}".format(settings.APPNAME,
+                                                                            get_date_time_now("%d/%m/%Y %H:%M:%S")))
 
         try:
 
@@ -390,7 +392,8 @@ class Image_Pre_Processing(object):
         bounding_rects = None
 
         execute_log.info(
-            "OCR TABLES - OBTENDO AS TABELAS - {}".format(get_date_time_now("%d/%m/%Y %H:%M:%S")))
+            "{} - OBTENDO AS TABELAS - {}".format(settings.APPNAME,
+                                                  get_date_time_now("%d/%m/%Y %H:%M:%S")))
 
         try:
             # OBTENDO A MÁSCARA
@@ -463,3 +466,41 @@ class Image_Pre_Processing(object):
                     return image_cropped_contour
 
         return image
+
+
+
+    def orchestra_pre_processing(self, image):
+
+        """
+
+            1) A IMAGEM É LIDA EM ESCALA DE CINZA;
+            2) O GAUSSIAN BLUR É EXECUTADO PARA REMOVER QUALQUER RUÍDO DISPONÍVEL;
+            3) O LIMIAR ADAPTATIVO É APLICADO À IMAGEM BORRADA;
+
+            # Arguments
+                image                             - Required : Imagem a ser lida (String)
+
+            # Returns
+                image                             - Required : Imagem lida em escala de cinza (Array)
+                preprocess_blur_threshold_img     - Required : Imagem após aplicação
+                                                               do limiar adaptativo (Array)
+
+
+        """
+
+        # INICIANDO AS VARIÁVEIS QUE SERÃO RETORNADAS
+        validator = False
+        preprocess_blur_threshold_img = None
+
+        try:
+            # ORQUESTRANDO A LEITURA DA IMAGEM
+            image = orchestra_read_image(image)
+
+            # REALIZANDO O PRÉ PROCESSAMENTO DA IMAGEM COM BLURRING
+            validator, preprocess_blur_threshold_img = Image_Pre_Processing.preprocess_blur_threshold_img(self,
+                                                                                                          image)
+
+        except Exception as ex:
+            execute_log.error("ERRO NA FUNÇÃO: {} - {}".format(stack()[0][3], ex))
+
+        return validator, preprocess_blur_threshold_img
