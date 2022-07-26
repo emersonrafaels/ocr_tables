@@ -68,7 +68,7 @@ PREFIX_DIR_SAVE_RESULTS_TABLE = "RESULTADO_OCR_TABLES"
 
 PATTERN_FATURAMENTO = 'R(\$|S)'
 
-PATTERN_CNPJ = '([0-9]{2}(\.|,)?[0-9]{3}(\.|,)?[0-9]{3}\/?[0-9]{4}\-?[0-9]{2}){e<=5}'
+PATTERN_CNPJ = '([0-9]{2}(\.|,)?[0-9]{3}(\.|,)?[0-9]{3}\/?[0-9]{4}(\-?[0-9]{2})?){e<=5}'
 
 PATTERN_ONLY_NUMBERS = '[^\d]'
 
@@ -86,6 +86,8 @@ PATTERN_FATURAMENTO_2 = '\w\s\d{1,4}\s\w'
 DICT_MONTHS_ABREV = {"JAN" = 1, "FEV" = 2, "MAR" = 3, "ABR" = 4, "MAI" = 5, "JUN" = 6, "JUL" = 7, "AGO" = 8, "SET" = 9, "OUT" = 10, "NOV" = 11, "DEZ" = 12}
 
 DICT_MONTHS_COMPLETE = {"JANEIRO" = 1, "FEVEREIRO" = 2, "MARCO" = 3, "ABRIL" = 4, "MAIO" = 5, "JUNHO" = 6, "JULHO" = 7, "AGOSTO" = 8, "SETEMBRO" = 9, "OUTUBRO" = 10, "NOVEMBRO" = 11, "DEZEMBRO" = 12}
+
+WORDS_BLACK_LIST_CNPJ = ["CPF"]
 
 # INICIANDO OS PERCENTUAIS DE MATCH DEFAULT
 DEFAULT_PERCENTUAL_MATCH = 60

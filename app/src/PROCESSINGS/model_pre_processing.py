@@ -461,7 +461,7 @@ class Image_Pre_Processing(object):
                     # COM O CONTORNO ENCONTRADO A ÚLTIMA ETAPA, REALIZAMOS O CROP DA IMAGEM
                     validator, image_cropped_contour = self.__crop_image_countour(image, contours)
 
-                    print("FORAM ENCONTRADAS {} TABELAS".format(len(image_cropped_contour)))
+                    execute_log.info("FORAM ENCONTRADAS {} TABELAS".format(len(image_cropped_contour)))
 
                     return image_cropped_contour
 

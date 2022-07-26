@@ -27,11 +27,12 @@ import regex as re
 
 from dynaconf import settings
 
-import execute_log
-from src.UTILS.image_ocr import ocr_functions
-from src.UTILS.extract_infos import get_matchs_line, get_similitary
-from src.UTILS.generic_functions import convert_text_unidecode, verify_find_intersection
-from src.PROCESSINGS.model_pre_processing import Image_Pre_Processing
+from app import execute_log
+from app.src.UTILS.image_ocr import ocr_functions
+from app.src.UTILS.extract_infos import get_matchs_line, get_similitary
+from app.src.UTILS.generic_functions import convert_text_unidecode, verify_find_intersection
+from app.src.PROCESSINGS.model_pre_processing import Image_Pre_Processing
+from app.src.PROCESS_FIELDS.process_cnpj import Execute_Process_CNPJ
 
 
 class Execute_OCR():
@@ -51,50 +52,6 @@ class Execute_OCR():
 
         # 4 - INICIANDO A VARIÁVEL QUE CONTÉM O LIMIT NA CHAMADA DE MÁXIMAS SIMILARIDADES
         self.limit_result_best_similar = settings.DEFAULT_LIMIT_RESULT_BEST_SIMILAR
-
-
-    @staticmethod
-    def pos_processing_cnpj(text_input, pattern, validator_only_numbers=False):
-
-        """
-
-            FORMATA O CNPJ OBTIDO DA CARTA DE FATURAMENTO
-
-            # Arguments
-                text_input                - Required : Texto de input (String)
-                pattern                   - Required : Pattern de formatação a ser utilizado (String)
-                validator_only_numbers    - Optional : Caso True, retorna o CNPJ apenas de forma numérica.
-                                                       Sem utilizar '-', '.', '/'. (Boolean)
-
-            # Returns
-                result_cnpj             - Required : Resultado da formatação (String)
-
-        """
-
-        try:
-            # MANTENDO APENAQS OS NÚMEROS DO CNPJ DE INPUT
-            text_input_only_numbers = re.sub(pattern=pattern,
-                                             repl="",
-                                             string=text_input)
-
-            if not validator_only_numbers:
-
-                # FORMATANDO O CNPJ OBTIDO
-                result_cnpj = "{}.{}.{}/{}-{}".format(text_input_only_numbers[:2],
-                                                      text_input_only_numbers[2:5],
-                                                      text_input_only_numbers[5:8],
-                                                      text_input_only_numbers[8:12],
-                                                      text_input_only_numbers[12:])
-
-                return result_cnpj
-
-            else:
-                return text_input_only_numbers
-
-        except Exception as ex:
-            execute_log.error("ERRO NA FUNÇÃO: {} - {}".format(stack()[0][3], ex))
-
-            return text_input
 
 
     def get_table_faturamento(self, text_input):
@@ -322,21 +279,13 @@ class Execute_OCR():
 
         # INICIANDO AS VARIÁVEIS RESULTANTES
         dict_images = {}
+        list_result = []
         json_result = {}
         json_result["cnpj_cliente"] = ""
         json_result["tabela_valores"] = ""
+        validator_pre_processing = False
 
         for result in result_tables:
-
-            if settings.PRE_PROC_IMAGE:
-                # REALIZANDO O PRÉ PROCESSAMENTO DA IMAGEM
-                image_pre_processing = Image_Pre_Processing().orchestra_pre_processing(result["image_file"])
-
-                # REALIZANDO O OCR SOBRE A IMAGEM
-                text_ocr_pre_processing = ocr_functions(type_return_ocr_input="TEXTO").Orquestra_OCR(image_pre_processing)
-
-                # SALVANDO O TEXTO OBTIDO
-                dict_images["PRE_PROCESSING"] = text_ocr_pre_processing
 
             # REALIZANDO O OCR SOBRE A IMAGEM
             text_ocr = ocr_functions(type_return_ocr_input="TEXTO").Orquestra_OCR(result["image_file"])
@@ -344,17 +293,32 @@ class Execute_OCR():
             # SALVANDO O TEXTO OBTIDO
             dict_images["IMG_ORIGINAL"] = text_ocr
 
+            if settings.PRE_PROC_IMAGE:
+                # REALIZANDO O PRÉ PROCESSAMENTO DA IMAGEM
+                validator_pre_processing, image_pre_processing = Image_Pre_Processing().orchestra_pre_processing(result["image_file"])
+
+                if validator_pre_processing:
+
+                    # REALIZANDO O OCR SOBRE A IMAGEM
+                    text_ocr_pre_processing = ocr_functions(type_return_ocr_input="TEXTO").Orquestra_OCR(image_pre_processing)
+
+                    # SALVANDO O TEXTO OBTIDO
+                    dict_images["PRE_PROCESSING"] = text_ocr_pre_processing
+
             for idx, image in enumerate(dict_images):
+
+                execute_log.info("{} - IMAGEM ATUAL: {}".format(settings.APPNAME, image))
 
                 # FORMATANDO O RESULTADO DO OCR
                 result_ocr = convert_text_unidecode(dict_images[image]).upper()
 
                 # OBTENDO - CNPJ
-                list_result_cnpj = get_matchs_line(result_ocr, settings.PATTERN_CNPJ)
+                json_result["cnpj_cliente"] = Execute_Process_CNPJ().get_result_cnpjs(text=result_ocr,
+                                                                                      pattern=settings.PATTERN_CNPJ,
+                                                                                      words_black_list=settings.WORDS_BLACK_LIST_CNPJ +
+                                                                                            list(settings.DICT_MONTHS_COMPLETE.keys()) +
+                                                                                            list(settings.DICT_MONTHS_ABREV.keys()))
 
-                # FORMATANDO O RESULTADO OBTIDO - CNPJ
-                json_result["cnpj_cliente"] = [Execute_OCR.pos_processing_cnpj(value[-1],
-                                                                               settings.PATTERN_ONLY_NUMBERS, validator_only_numbers=settings.CNPJ_ONLY_NUMBERS) for value in list_result_cnpj]
 
                 # OBTENDO A TABELA DE FATURAMENTO
                 result_table = Execute_OCR.get_table_faturamento(self, result_ocr)
@@ -369,4 +333,6 @@ class Execute_OCR():
                 result_values_faturamento = Execute_OCR.get_result_faturamento(result_table,
                                                                                settings.REGEX_ONLY_LETTERS_NUMBERS_DOT_BARS_DASHES_COMMA)
 
-        return result_ocr, json_result
+                list_result.append(json_result)
+
+        return result_ocr, list_result

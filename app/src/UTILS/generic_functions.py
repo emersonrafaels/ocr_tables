@@ -21,6 +21,7 @@ import time
 from unidecode import unidecode
 
 import pandas as pd
+from numpy import array
 
 
 def verify_exists(dir):
@@ -132,6 +133,32 @@ def converte_int(valor_para_converter):
     except Exception as ex:
         print(ex)
         return None
+
+
+def lista_bi_to_uni(list_bi):
+
+    """
+
+        FUNÇÃO QUE PERMITE A CONVERSÃO DE UMA LISTA BIDIMENSIONAL PARA UMA LISTA SIMPLES.
+
+        # Arguments
+            list_bi           - Required : Lista Bidimensional. (List)
+
+        # Returns
+            lista_uni         - Required : Lista Unidimensional. (List)
+
+    """
+
+    lista_uni = []
+
+    try:
+        for operacao in list_bi:
+            lista_uni.append(operacao[0])
+
+    except Exception as ex:
+        lista_uni = list_bi
+
+    return lista_uni
 
 
 def get_split_dir(dir):
@@ -257,6 +284,114 @@ def get_date_time_now(return_type):
     except Exception as ex:
         print("ERRO NA FUNÇÃO {} - {}".format(stack()[0][3], ex))
         return datetime.datetime.now()
+
+
+def order_list_with_arguments(list_values, number_column_order=1, limit=1):
+
+    """
+
+        FUNÇÃO PARA ORDENAR UMA LISTA E OBTER UM NÚMERO (LIMIT) DE ARGUMENTOS.
+
+            1) ORDENA A LISTA USANDO UM DOS SEUS ARGUMENTOS (number_column_order)
+            2) FILTRA A LISTA DE ACORDO COM UM NÚMERO DESEJADO DE ELEMENTOS (limit)
+
+        # Arguments
+            list_values                  - Required : Lista de valores para processar (List)
+            number_column_order          - Optional : Qual o argumento deve ser usado
+                                                      como parâmetro de ordenação (Integer)
+            limit                        - Optional : Número desejado de argumentos
+                                                      para retorno da função (Integer)
+
+        # Returns
+            return_list                 - Required : Lista resultado (List)
+
+    """
+
+    # INICIANDO A LISTA DE VARIÁVEL QUE ARMAZENARÁ OS INDEX RESULTANTES
+    list_idx = []
+
+    # VERIFICANDO SE O ARGUMENTO DE ORDENAÇÃO É UM NÚMERO INTEIRO
+    if isinstance(number_column_order, str):
+        if number_column_order.isdigit():
+            number_column_order = int(number_column_order)
+        else:
+            number_column_order = 1
+
+    # VERIFICANDO SE O VALOR DE LIMIT É UM NÚMERO INTEIRO
+    if isinstance(limit, str):
+        if limit.isdigit():
+            limit = int(limit)
+        else:
+            limit = 1
+
+    # ORDENANDO POR UM DOS VALORES DE ARGUMENTOS DA LISTA
+    # FILTRANDO DE ACORDO COM O LIMITE DESEJADO
+    list_result_filter = sorted(list_values, key=lambda row: (row[number_column_order]), reverse=True)[:limit]
+
+    # PERCORRENDO A LISTA DE RESULTADOS, PARA FILTAR NA LISTA ORIGINAL
+    # O OBJETIVO É MANTER NA LISTA ORIGINAL (MANTENDO A ORDEM DELA)
+    for value in list_result_filter:
+        list_idx.append(list_values.index(value))
+
+    # MANTENDO APENAS OS IDX DESEJADOS
+    return_list = array(list_values, dtype=object)[list_idx]
+
+    # RETORNANDO O RESULTADO
+    return return_list
+
+
+def remove_line_with_black_list_words(text, list_words=[], mode="FIND"):
+
+    """
+
+        FUNÇÃO PARA REMOVER LINHAS QUE CONTÉM PALAVRAS NÃO DESEJADAS
+
+        HÁ DOIS MODOS DE BUSCA:
+            EQUAL - A PALAVRA ESTÁ EXATAMENTE IGUAL
+            FIND - A PALAVRA ESTÁ PARCIALMENTE IGUAL
+
+        # Arguments
+            text                  - Required : Texto a ser analisado (String)
+            list_words            - Optional : Lista de palavras a serem buscadas (List)
+            mode                  - Optional : Modo de busca da palavra (String)
+
+        # Returns
+            return_text          - Required : Texto resultante após a análise (String)
+
+    """
+
+    # INICIANDO O VALIDADOR
+    validador = False
+
+    return_text = ""
+
+    for line in text.split("\n"):
+
+        validador = False
+
+        # PERCORRENDO TODAS AS PALAVRAS DA BLACK LIST
+        for value in list_words:
+
+            if mode == "FIND":
+
+                if line.find(value)!=-1:
+                    # A PALAVRA FOI ENCONTRADA
+                    validador = True
+                    break
+
+            else:
+
+                if value in line.split(" "):
+                    # A PALAVRA FOI ENCONTRADA
+                    validador = True
+                    break
+
+        if validador is False:
+            # A PALAVRA NÃO FOI ENCONTRADA
+            return_text = return_text + "\n" + line
+
+    # RETORNANDO O TEXTO FINAL
+    return return_text
 
 
 def verify_find_intersection(data_verified, data_lists):
