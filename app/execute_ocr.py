@@ -6,7 +6,6 @@
     O OCR É APLICADO SOBRE A IMAGEM COMPLETA (dir_full_image)
     E SOBRE AS TABELAS (SE ENCONTRADAS) (dir_table_image).
 
-
     # Arguments
         dir_full_image              - Required : Caminho ds imagem completa (String)
         dir_table_image             - Required : Caminho dss tabelas encontradas (String)
@@ -19,7 +18,7 @@
 
 __version__ = "1.0"
 __author__ = """Emerson V. Rafael (EMERVIN)"""
-__data_atualizacao__ = "22/03/2022"
+__data_atualizacao__ = "26/06/2022"
 
 
 from inspect import stack
@@ -54,6 +53,12 @@ class Execute_OCR():
         self.limit_result_best_similar = settings.DEFAULT_LIMIT_RESULT_BEST_SIMILAR
 
 
+    @staticmethod
+    def filter_values_table_faturamento(list_values, filters_validate):
+
+        pass
+
+
     def get_table_faturamento(self, text_input):
 
         """
@@ -74,64 +79,34 @@ class Execute_OCR():
         # OBTENDO - FATURAMENTO - FORMA 1
         list_result_faturamento = get_matchs_line(text_input, settings.PATTERN_FATURAMENTO_1)
 
-        if list_result_faturamento:
-
-            # FILTRANDO RESULTADOS QUE POSSUEM MESES
-            list_filter_result = [value[0] for value in list_result_faturamento if verify_find_intersection(value[0],
-                                                                                                            self.list_values_months)]
-
-            if list_filter_result:
-
-                return list_filter_result
-
-        if not list_filter_result:
-
-            # FILTRANDO RESULTADOS QUE POSSUEM MESES
-            list_filter_result = [value for value in text_input.split("\n") if verify_find_intersection(value,
-                                                                                                        self.list_values_months_complete)]
+        # FILTRANDO RESULTADOS QUE POSSUEM MESES
+        list_filter_result = [value[0] for value in list_result_faturamento if verify_find_intersection(value[0], self.list_values_months)]
 
         return list_filter_result
 
 
-    def pos_processing_faturamento(self, list_result_faturamento):
+    def pos_processing_faturamento(self):
 
         """
 
             FUNÇÃO RESPONSÁVEL POR FORMATAR A LISTA DE POSSÍVEIS VALORES DE FATURAMENTO
             REALIZANDO A OBTENÇÃO DAS INFORMAÇÕES DE:
+
                 1) MÊS
                 2) ANO
                 3) FATURAMENTO
 
             # Arguments
-                list_result_faturamento                      - Required : Lista com os
-                                                                          valores de faturamento (List)
 
             # Returns
-                list_result_faturamento_formatted            - Required : Resultado de faturamento
-                                                                          após formatação (List)
 
         """
 
-        # DADO UMA LISTA DE VALORES, BUSCAMOS OBTER:
-            # 1) UM VALOR MÊS DESSA LISTA (HÁ A LISTA DE MESES POSSÍVEIS)
-            # 2) UM ANO DESSA LISTA (4 NÚMEROS, ENTRE 1900 E 2500)
-            # 3) VALORES DE FATURAMENTO (NÚMEROS, COM VALORES ACIMA DE 2500)
-
-        # PERCORRENDO CADA UM DOS VALORES DA LISTA
-        for value in list_result_faturamento:
-
-            # CAPTURANDO O VALOR DE MÊS
-            result_month = [month for month in self.list_values_months_complete if value.find(month)!=-1]
-
-            # CAPTURANDO O VALOR DE ANO
-            result_year = re.match(pattern=settings.REGEX_DATE_VALID, string=value)
-
-        print(result_month)
+        pass
 
 
     @staticmethod
-    def get_result_faturamento(list_result_faturamento, pattern=None):
+    def get_result_faturamento_format_dict_list(list_result_faturamento, pattern=None):
 
         """
 
@@ -140,7 +115,7 @@ class Execute_OCR():
                 2) MESES (result_months)
                 3) VALORES DE FATURAMENTO (result_values_faturamento)
 
-            AO FINAL, REALIZA A UNIFICAÇÃO DAS LISTAS EM UM DICT.
+            AO FINAL, REALIZA A UNIFICAÇÃO DAS LISTAS EM UM LISTA.
 
             O RESULTADO FINAL TEM O FORMATO:
                 'tabela_valores': {0: ['OUTUBRO', '2016', '298.320,00'], 0: ['DEZEMBRO', '2016', '300.320,00']}
@@ -148,6 +123,7 @@ class Execute_OCR():
             # Arguments
                 list_result_faturamento         - Required : Lista com os
                                                              valores de faturamento (List)
+                pattern                         - Required : Pattern de formatação ser utilizado (String)
 
             # Returns
                 result_years                    - Required : Resultado contendo os anos obtidos (String)
@@ -183,6 +159,7 @@ class Execute_OCR():
                 result_months.append(result_split[1])
                 result_values_faturamentos.append(result_split[-1])
 
+            # CONVERTENDO MULTIDIMENSIONAL LIST TO DICT
             result_values_faturamentos_dict = {index: list(value) for index,
                                                                       value in enumerate(list(zip(result_years,
                                                                                                   result_months,
@@ -195,7 +172,7 @@ class Execute_OCR():
 
 
     @staticmethod
-    def get_result_faturamento_alternate_format(list_result_faturamento, pattern=None):
+    def get_result_faturamento_format_dict_dict(list_result_faturamento, pattern=None):
 
         """
 
@@ -207,18 +184,19 @@ class Execute_OCR():
             AO FINAL, REALIZA A UNIFICAÇÃO DAS LISTAS EM UM DICT.
 
             O RESULTADO FINAL TEM O FORMATO:
-                'tabela_valores': [{'mes': 'OUTUBRO', 'ano': '2016', 'valor': '298.320,00'}, {'mes': 'DEZEMBRO', 'ano': '2016', 'valor': '300.320,00'}]
+                'tabela_valores': {0: ['OUTUBRO', '2016', '298.320,00'], 0: ['DEZEMBRO', '2016', '300.320,00']}
 
             # Arguments
                 list_result_faturamento         - Required : Lista com os
                                                              valores de faturamento (List)
+                pattern                         - Required : Pattern de formatação ser utilizado (String)
 
             # Returns
                 result_years                    - Required : Resultado contendo os anos obtidos (String)
                 result_months                   - Required : Resultado contendo os meses obtidos (String)
                 result_values_faturamentos      - Required : Resultado contendo os faturamentos obtidos (String)
-                result_values_faturamentos_list - Required : Resultando zipando os
-                                                             resultados de ano, mes e valores (List)
+                result_values_faturamentos_dict - Required : Resultando zipando os
+                                                             resultados de ano, mes e valores (Dict)
 
         """
 
@@ -226,7 +204,7 @@ class Execute_OCR():
         result_years = []
         result_months = []
         result_values_faturamentos = []
-        result_values_faturamentos_list = {}
+        result_values_faturamentos_dict = {}
 
         try:
             # PERCORRENDO CADA UM DOS FATURAMENTOS OBTIDOS
@@ -247,14 +225,52 @@ class Execute_OCR():
                 result_months.append(result_split[1])
                 result_values_faturamentos.append(result_split[-1])
 
-                result_values_faturamentos_list.append(dict(mes=result_years[-1],
-                                                            ano=result_months[-1],
-                                                            valor=result_values_faturamentos[-1]))
+            # CONVERTENDO MULTIDIMENSIONAL LIST TO DICT
+            result_values_faturamentos_dict = {index: list(value) for index,
+                                                                      value in enumerate(list(zip(result_years,
+                                                                                                  result_months,
+                                                                                                  result_values_faturamentos)))}
 
         except Exception as ex:
             execute_log.error("ERRO NA FUNÇÃO: {} - {}".format(stack()[0][3], ex))
 
-        return result_values_faturamentos_list, result_years, result_months, result_values_faturamentos
+        return result_values_faturamentos_dict, result_years, result_months, result_values_faturamentos
+
+
+    def get_similarity_months(self, values_table, list_months):
+
+        """
+
+            OBTÉM OS VALORES SIMILARES DE MÊS
+
+            OBTÉM O VALOR DE MÁXIMA SIMILARIDADE ENTRE OCR E LISTA DE MESES POSSIVEIS.
+
+            # Arguments
+                values_table            - Required : Tabela de faturamento
+                                                     obtida no OCR (Dict)
+                list_months             - Required : Lista de meses possíveis (List)
+
+            # Returns
+                values_table_similarity - Required : Tabela de faturamento
+                                                     após realização de matchs
+                                                     de similaridade (Dict)
+
+        """
+
+        # PERCORRENDO CADA VALOR DA TABELA
+        for key in values_table:
+
+            result_similarity = get_similitary(values_table[key]["mes"],
+                                               self.list_values_months,
+                                               self.default_percent_match,
+                                               self.similarity_pre_processing,
+                                               self.limit_result_best_similar)
+
+            print(result_similarity)
+
+            values_table[key]["mes"] = result_similarity
+
+        return values_table
 
 
     def execute_pipeline_ocr(self, result_tables):
@@ -280,9 +296,6 @@ class Execute_OCR():
         # INICIANDO AS VARIÁVEIS RESULTANTES
         dict_images = {}
         list_result = []
-        json_result = {}
-        json_result["cnpj_cliente"] = ""
-        json_result["tabela_valores"] = ""
         validator_pre_processing = False
 
         for result in result_tables:
@@ -307,6 +320,11 @@ class Execute_OCR():
 
             for idx, image in enumerate(dict_images):
 
+                # INICIANDO AS VARIÁVEIS DE JSON RESULT
+                json_result = {}
+                json_result["cnpj_cliente"] = ""
+                json_result["tabela_valores"] = ""
+
                 execute_log.info("{} - IMAGEM ATUAL: {}".format(settings.APPNAME, image))
 
                 # FORMATANDO O RESULTADO DO OCR
@@ -315,6 +333,7 @@ class Execute_OCR():
                 # OBTENDO - CNPJ
                 json_result["cnpj_cliente"] = Execute_Process_CNPJ().get_result_cnpjs(text=result_ocr,
                                                                                       pattern=settings.PATTERN_CNPJ,
+                                                                                      range_error_pattern=settings.RANGE_PATTERN_ERROR_CNPJ,
                                                                                       words_black_list=settings.WORDS_BLACK_LIST_CNPJ +
                                                                                             list(settings.DICT_MONTHS_COMPLETE.keys()) +
                                                                                             list(settings.DICT_MONTHS_ABREV.keys()))

@@ -116,7 +116,9 @@ class Execute_Process_CNPJ():
         return list_best_cnpjs
 
 
-    def get_result_cnpjs(self, text, pattern, words_black_list=[], limit=1):
+    def get_result_cnpjs(self, text, pattern,
+                         range_error_pattern=[1, 1], words_black_list=[],
+                         limit=1):
 
         """
 
@@ -131,6 +133,8 @@ class Execute_Process_CNPJ():
                 text                   - Required : Texto a ser analisado (String)
                 pattern                - Required : Pattern a ser utilizado para
                                                     obtenção dos cnpjs (Regex)
+                range_error_pattern    - Optional : Número de erroos
+                                                    aceitos no pattern (List)
                 words_black_list       - Optional : Palavras que não
                                                     devem constar na linha (List)
                 limit                  - Optional : Quantidade de limites
@@ -144,12 +148,33 @@ class Execute_Process_CNPJ():
         # INICIANDO AS VARIÁVEIS
         result_cnpjs = []
 
+        # VERIFICANDO SE O RANGE ERROR É UMA LISTA
+        if not isinstance(range_error_pattern, list):
+            # VERIFICANDO SE O RANGE ERROR PATTERN É UM INTEIRO
+            if isinstance(range_error_pattern, int):
+                range_error_pattern = [range_error_pattern]
+            # VERIFICANDO SE O RANGE ERROR PATTERN É UMA STRING
+            elif isinstance(range_error_pattern, str):
+                # VERIFICANDO SE O RANGE ERROR PATTERN É UMA STRING
+                # QUE PODE SER CONVERTIDA EM NÚMERO
+                if range_error_pattern.isdigit():
+                    range_error_pattern = [int(range_error_pattern)]
+                else:
+                    range_error_pattern = [1, 1]
+            else:
+                range_error_pattern = [1, 1]
+
         # REALIZANDO A LIMPEZA DO TEXTO, RETIRANDO BLACKLIST
         text = remove_line_with_black_list_words(text=text, list_words=words_black_list)
 
         try:
-            # OBTENDO CNPJS
-            cnpjs = get_matchs_line(text=text, field_pattern=pattern)
+            for n_error in range_error_pattern:
+
+                # FORMATANDO O PATTERN
+                pattern_error = pattern.format(error=n_error)
+
+                # OBTENDO CNPJS
+                cnpjs = get_matchs_line(text=text, field_pattern=pattern_error)
 
             # OBTENDO O VALOR COM MELHOR MATCH0
             result_cnpjs = Execute_Process_CNPJ.get_best_match(self, list_cnpjs=cnpjs, limit=limit)

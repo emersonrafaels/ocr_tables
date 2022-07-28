@@ -68,7 +68,8 @@ PREFIX_DIR_SAVE_RESULTS_TABLE = "RESULTADO_OCR_TABLES"
 
 PATTERN_FATURAMENTO = 'R(\$|S)'
 
-PATTERN_CNPJ = '([0-9]{2}(\.|,)?[0-9]{3}(\.|,)?[0-9]{3}\/?[0-9]{4}(\-?[0-9]{2})?){e<=5}'
+RANGE_PATTERN_ERROR_CNPJ = [0, 5]
+PATTERN_CNPJ = '([0-9]{2}(\.|,)?[0-9]{3}(\.|,)?[0-9]{3}\/?[0-9]{4}(\-?[0-9]{2})?){e<={error}}'
 
 PATTERN_ONLY_NUMBERS = '[^\d]'
 
