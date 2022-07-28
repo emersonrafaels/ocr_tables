@@ -1,23 +1,18 @@
 """
 
-    CLASSE PARA PROCESSAMENTO DOS CAMPOS DE FORMATO CNPJ.
-
-    POSSUI FUNÇÕES PARA:
-        1) FILTRAR LINHAS DO TEXTO QUE CONTÉM PALAVRAS NÃO DESEJADAS
-        2) OBTER CNPJS NO TEXTO
-        3) OBTER OS CNPJ COM OS MAIORES MATCHS
-
     # Arguments
         text                   - Required : Texto a ser analisado (String)
         pattern                - Required : Pattern a ser utilizado para
                                             obtenção dos cnpjs (Regex)
+        range_error_pattern    - Optional : Número de erroos
+                                            aceitos no pattern (List)
         words_black_list       - Optional : Palavras que não
                                             devem constar na linha (List)
         limit                  - Optional : Quantidade de limites
                                             desejados (Integer)
 
     # Returns
-        cnpjs                  - Required : CNPJ's (List)
+        result_cnpjs           - Required : CNPJ's obtidos (List)
 
 """
 
@@ -147,6 +142,7 @@ class Execute_Process_CNPJ():
 
         # INICIANDO AS VARIÁVEIS
         result_cnpjs = []
+        list_cnpjs = []
 
         # VERIFICANDO SE O RANGE ERROR É UMA LISTA
         if not isinstance(range_error_pattern, list):
@@ -171,13 +167,16 @@ class Execute_Process_CNPJ():
             for n_error in range_error_pattern:
 
                 # FORMATANDO O PATTERN
-                pattern_error = pattern.format(error=n_error)
+                pattern_error = pattern.replace('n_error', str(n_error))
 
                 # OBTENDO CNPJS
-                cnpjs = get_matchs_line(text=text, field_pattern=pattern_error)
+                cnpjs_matchs = get_matchs_line(text=text, field_pattern=pattern_error)
 
-            # OBTENDO O VALOR COM MELHOR MATCH0
-            result_cnpjs = Execute_Process_CNPJ.get_best_match(self, list_cnpjs=cnpjs, limit=limit)
+                # SALVANDO A LISTA DE CNPJS
+                list_cnpjs += cnpjs_matchs
+
+            # OBTENDO O VALOR COM MELHOR MATCH
+            result_cnpjs = Execute_Process_CNPJ.get_best_match(self, list_cnpjs=list_cnpjs, limit=limit)
 
             # FORMATANDO O RESULTADO OBTIDO - CNPJ
             result_cnpjs = [Execute_Process_CNPJ.pos_processing_cnpj(value[3],
