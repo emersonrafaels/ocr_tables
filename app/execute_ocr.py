@@ -122,7 +122,8 @@ class Execute_OCR():
                 json_result["tabela_valores"], \
                 result_years, \
                 result_months, \
-                result_values_faturamento = Execute_Process_Tabela_Faturamento().orchestra_get_table_faturamento(self, result_ocr)
+                result_values_faturamento = Execute_Process_Tabela_Faturamento().orchestra_get_table_faturamento(text=result_ocr,
+                                                                                                                 pattern=settings.PATTERN_FATURAMENTO_1)
 
                 list_result.append(json_result)
 

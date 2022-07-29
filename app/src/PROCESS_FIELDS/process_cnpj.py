@@ -164,7 +164,7 @@ class Execute_Process_CNPJ():
         text = remove_line_with_black_list_words(text=text, list_words=words_black_list)
 
         try:
-            for n_error in range_error_pattern:
+            for n_error in np.arange(np.min(range_error_pattern), np.max(range_error_pattern)+1):
 
                 # FORMATANDO O PATTERN
                 pattern_error = pattern.replace('n_error', str(n_error))

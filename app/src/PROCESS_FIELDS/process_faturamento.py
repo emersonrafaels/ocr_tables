@@ -36,14 +36,27 @@ from app import execute_log
 from app.src.UTILS.extract_infos import get_matchs_line, get_similitary
 from app.src.UTILS.generic_functions import (remove_line_with_black_list_words,
                                              lista_bi_to_uni,
-                                             verify_find_intersection)
+                                             verify_find_intersection,
+                                             has_number)
 
 
 class Execute_Process_Tabela_Faturamento():
 
     def __init__(self):
 
-        pass
+        # 1 - OBTENDO A LISTA DE MESES
+        self.list_values_months_abrev = list(settings.DICT_MONTHS_ABREV.keys())
+        self.list_values_months_complete = list(settings.DICT_MONTHS_COMPLETE.keys())
+        self.list_values_months = self.list_values_months_abrev + self.list_values_months_complete
+
+        # 2 - INICIANDO OS PERCENTUAIS DE MATCH
+        self.default_percent_match = settings.DEFAULT_PERCENTUAL_MATCH
+
+        # 3 - DEFININDO SE DEVE HAVER PRÉ PROCESSAMENTO DOS ITENS ANTES DO CÁLCULO DE SEMELHANÇA
+        self.similarity_pre_processing = settings.DEFAULT_PRE_PROCESSING
+
+        # 4 - INICIANDO A VARIÁVEL QUE CONTÉM O LIMIT NA CHAMADA DE MÁXIMAS SIMILARIDADES
+        self.limit_result_best_similar = settings.DEFAULT_LIMIT_RESULT_BEST_SIMILAR
 
 
     def get_similarity_months(self, values_table, list_months):
@@ -219,7 +232,7 @@ class Execute_Process_Tabela_Faturamento():
         pass
 
 
-    def get_table_faturamento(self, text_input):
+    def get_table_faturamento(self, text_input, pattern):
 
         """
 
@@ -227,6 +240,8 @@ class Execute_Process_Tabela_Faturamento():
 
             # Arguments
                 text_input                - Required : Texto de input (String)
+                pattern                   - Required : Pattern a ser utilizado para
+                                                       obtenção da tabela de faturamento (Regex)
 
             # Returns
                 result_faturamento        - Required : Resultado do faturamento (String)
@@ -236,12 +251,16 @@ class Execute_Process_Tabela_Faturamento():
         # INICIANDO A VARIÁVEL CONTENDO A LISTA DE RESULTADO
         list_filter_result = []
 
-        # OBTENDO - FATURAMENTO - FORMA 1
-        list_result_faturamento = get_matchs_line(text_input, settings.PATTERN_FATURAMENTO_1)
+        # OBTENDO - FATURAMENTO - FORMA 1 - PATTERMS
+        list_result_faturamento = get_matchs_line(text=text_input,
+                                                  field_pattern=pattern,
+                                                  only_one_match_per_line=True)
 
+        # OBTENDO - FATURAMENTO - FORMA 2
         # FILTRANDO RESULTADOS QUE POSSUEM MESES
+        # FILTRANDO RESULTADOS QUE POSSUEM NÚMEROS
         list_filter_result = [value[0] for value in list_result_faturamento if
-                              verify_find_intersection(value[0], self.list_values_months)]
+                              (verify_find_intersection(value[0], self.list_values_months) and has_number(value[0]))]
 
         return list_filter_result
 
@@ -263,10 +282,11 @@ class Execute_Process_Tabela_Faturamento():
 
         """
 
+        # REALIZANDO O PÓS PROCESSAMENTO DOS MESES
         pass
 
 
-    def orchestra_get_table_faturamento(self, text_input):
+    def orchestra_get_table_faturamento(self, text, pattern):
 
         # INICIANDO O VALIDADOR
         validator = False
@@ -277,7 +297,7 @@ class Execute_Process_Tabela_Faturamento():
         json_result["tabela_valores"] = ""
 
         # OBTENDO A TABELA DE FATURAMENTO
-        result_table = Execute_Process_Tabela_Faturamento.get_table_faturamento(self, text_input)
+        result_table = Execute_Process_Tabela_Faturamento.get_table_faturamento(self, text, pattern)
 
         # REALIZANDO O PÓS PROCESSAMENTO DA TABELA DE FATURAMENTO
         Execute_Process_Tabela_Faturamento.pos_processing_faturamento(self, result_table)
@@ -286,8 +306,8 @@ class Execute_Process_Tabela_Faturamento():
         json_result["tabela_valores"], \
         result_years, \
         result_months, \
-        result_values_faturamento = Execute_Process_Tabela_Faturamento.get_result_faturamento(result_table,
-                                                                                              settings.REGEX_ONLY_LETTERS_NUMBERS_DOT_BARS_DASHES_COMMA)
+        result_values_faturamento = Execute_Process_Tabela_Faturamento.get_result_faturamento_format_dict_dict(result_table,
+                                                                                                               settings.REGEX_ONLY_LETTERS_NUMBERS_DOT_BARS_DASHES_COMMA)
 
         return json_result["tabela_valores"], \
                result_years, \

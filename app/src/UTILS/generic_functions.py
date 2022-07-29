@@ -19,6 +19,7 @@ from inspect import stack
 from os import path, makedirs, walk, getcwd
 import time
 from unidecode import unidecode
+import re
 
 import pandas as pd
 from numpy import array
@@ -159,6 +160,21 @@ def lista_bi_to_uni(list_bi):
         lista_uni = list_bi
 
     return lista_uni
+
+
+def has_number(value_test):
+
+    # OBTENDO O PATTERN DE APENAS NÚMEROS
+    pattern_number = '[^\d]'
+
+    try:
+        # REALIZANDO A VERIFICAÇÃO
+        if len(re.sub(pattern=pattern_number, string=value_test, repl="")) > 0:
+            return True
+    except Exception as ex:
+        print("ERRO NA FUNÇÃO {} - {}".format(stack()[0][3], ex))
+
+    return False
 
 
 def get_split_dir(dir):

@@ -44,7 +44,10 @@ def applied_validate_filter(match_analysis, filters_validate):
     return True
 
 
-def get_matchs_line(text, field_pattern, filters_validate=[]):
+def get_matchs_line(text,
+                    field_pattern,
+                    filters_validate=[],
+                    only_one_match_per_line=False):
 
     """
 
@@ -55,10 +58,14 @@ def get_matchs_line(text, field_pattern, filters_validate=[]):
         RECEBE O PATTERN: field_pattern
 
         # Arguments
-            text             - Required : Texto analisado (String)
-            field_pattern    - Required : Pattern a ser utilizado (Regex)
-            fields_validate  - Optional : Filtros e validações
-                                          a serem aplicadas (List)
+            text                            - Required : Texto analisado (String)
+            field_pattern                   - Required : Pattern a ser utilizado (Regex)
+            fields_validate                 - Optional : Filtros e validações
+                                                         a serem aplicadas (List)
+            only_one_match_per_line         - Optional : Se True, retorna
+                                                         apenas um append por
+                                                         match por linha (Boolean)
+
 
         # Returns
             matchs_text      - Required : Resultado do modelo
@@ -87,6 +94,9 @@ def get_matchs_line(text, field_pattern, filters_validate=[]):
                                            match.end(),
                                            match[0],
                                            match.fuzzy_counts])
+
+                    if only_one_match_per_line:
+                        break
 
     except Exception as ex:
         print("ERRO NA FUNÇÃO: {} - {}".format(stack()[0][3], ex))
