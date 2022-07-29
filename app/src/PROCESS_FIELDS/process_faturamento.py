@@ -200,13 +200,13 @@ class Execute_Process_Tabela_Faturamento():
             for value in list_result_faturamento:
 
                 if pattern:
-                    # MANTENDO APENAQS OS NÚMEROS DO CNPJ DE INPUT
+                    # MANTENDO APENAS LETRAS E NÚMEROS
                     value = re.sub(pattern=pattern, repl="", string=value)
 
                 # RETIRANDO ESPAÇOS A MAIS
                 value = " ".join(filter(lambda x: x, value.split(' ')))
 
-                # SEPARANDO OS VALORES OBIDOS POR ESPAÇO
+                # SEPARANDO OS VALORES OBTIDOS POR ESPAÇO
                 result_split = value.split(" ")
 
                 # ADICIONANDO O RESULTADO DO SPLIT
@@ -299,15 +299,15 @@ class Execute_Process_Tabela_Faturamento():
         # OBTENDO A TABELA DE FATURAMENTO
         result_table = Execute_Process_Tabela_Faturamento.get_table_faturamento(self, text, pattern)
 
-        # REALIZANDO O PÓS PROCESSAMENTO DA TABELA DE FATURAMENTO
-        Execute_Process_Tabela_Faturamento.pos_processing_faturamento(self, result_table)
-
         # FORMATANDO O RESULTADO OBTIDO - TABELA DE FATURAMENTO
         json_result["tabela_valores"], \
         result_years, \
         result_months, \
         result_values_faturamento = Execute_Process_Tabela_Faturamento.get_result_faturamento_format_dict_dict(result_table,
                                                                                                                settings.REGEX_ONLY_LETTERS_NUMBERS_DOT_BARS_DASHES_COMMA)
+
+        # REALIZANDO O PÓS PROCESSAMENTO DA TABELA DE FATURAMENTO
+        Execute_Process_Tabela_Faturamento.pos_processing_faturamento(result_table)
 
         return json_result["tabela_valores"], \
                result_years, \
