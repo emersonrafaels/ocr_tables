@@ -31,11 +31,13 @@ import itertools
 import regex as re
 
 from dynaconf import settings
-import numpy as np
+from typing import Union
 
 from app import execute_log
 from app.src.UTILS.combinations import all_combinations
-from app.src.UTILS.extract_infos import get_matchs_line, get_similitary
+from app.src.UTILS.extract_infos import (get_matchs_line,
+                                         get_matchs_strings,
+                                         get_similitary)
 from app.src.UTILS.generic_functions import (
     verify_find_intersection,
     has_number,
@@ -120,8 +122,6 @@ class Execute_Process_Tabela_Faturamento:
 
                 if result_similarity[0]:
 
-                    print("TRUE: {}".format(combination_str))
-
                     return True
 
         return False
@@ -151,6 +151,53 @@ class Execute_Process_Tabela_Faturamento:
             return True
 
         return False
+
+    @staticmethod
+    def get_month_year_faturamento(values_faturamento: Union[tuple, list]) -> list:
+
+        """
+
+        REALIZA A SEPARAÇÃO DA LISTA DE FATURAMENTO EM:
+            1) ANOS (result_years)
+            2) MESES (result_months)
+            3) VALORES DE FATURAMENTO (result_values_faturamento)
+
+
+        # Arguments
+            values_faturamento              - Required : Lista com os
+                                                         valores de faturamento (List)
+
+        # Returns
+            result_year                    - Required : Resultado contendo os anos obtidos (String)
+            result_month                   - Required : Resultado contendo os meses obtidos (String)
+            result_faturamento             - Required : Resultado contendo os faturamentos obtidos (String)
+
+        """
+
+        result_month = result_year = result_faturamento = ""
+
+        # OBTENDO O MÊS
+        result_pattern_month = get_matchs_strings(text=values_faturamento,
+                                                  field_pattern=settings.PATTERN_FATURAMENTO_1)
+
+        if result_pattern_month:
+            result_month = values_faturamento[values_faturamento.find(result_pattern_month[0][2]):].split(" ")[0]
+
+            values_faturamento = values_faturamento.replace(result_month, " ")
+
+        # OBTENDO O ANO
+        result_pattern_year = get_matchs_strings(text=values_faturamento,
+                                                 field_pattern=settings.PATTERN_YEAR)
+
+        if result_pattern_year:
+            result_year = values_faturamento[values_faturamento.find(result_pattern_year[0][2]):].split(" ")[0]
+
+            values_faturamento = values_faturamento.replace(result_year, " ")
+
+        # OBTENDO O VALOR
+        result_faturamento = values_faturamento.strip().replace(" ", ".")
+
+        return [result_month, result_year, result_faturamento]
 
     @staticmethod
     def get_result_faturamento_format_dict_list(list_result_faturamento, pattern=None):
@@ -199,7 +246,7 @@ class Execute_Process_Tabela_Faturamento:
                 value = " ".join(filter(lambda x: x, value.split(" ")))
 
                 # SEPARANDO OS VALORES OBIDOS POR ESPAÇO
-                result_split = value.split(" ")
+                result_split = Execute_Process_Tabela_Faturamento.get_month_year_faturamento(values_faturamento=value)
 
                 # ADICIONANDO O RESULTADO DO SPLIT
                 result_years.append(result_split[0])
@@ -264,11 +311,9 @@ class Execute_Process_Tabela_Faturamento:
             for value in list_result_faturamento:
 
                 if pattern:
-                    # MANTENDO APENAS LETRAS E NÚMEROS
+                    # MANTENDO APENAS LETRAS, NÚMEROS,
+                    # PONTUAÇÕES E CARACTERES ESPECIAIS DESEJADOS
                     value = re.sub(pattern=pattern, repl="", string=value)
-
-                # RETIRANDO ESPAÇOS A MAIS
-                value = " ".join(filter(lambda x: x, value.split(" ")))
 
                 # SEPARANDO OS VALORES OBTIDOS POR ESPAÇO
                 result_split = value.split(" ")
