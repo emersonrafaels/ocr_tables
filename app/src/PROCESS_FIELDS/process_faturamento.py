@@ -452,7 +452,7 @@ class Execute_Process_Tabela_Faturamento:
             result_months,
             result_values_faturamento,
         ) = Execute_Process_Tabela_Faturamento.get_result_faturamento_format_dict_dict(
-            result_table, settings.REGEX_ONLY_LETTERS_NUMBERS_DOT_BARS_DASHES_COMMA
+            result_table, settings.PATTERN_ONLY_LETTERS_NUMBERS_DOT_BARS_DASHES_COMMA
         )
 
         return (
