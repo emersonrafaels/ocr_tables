@@ -205,7 +205,7 @@ class Execute_Process_Tabela_Faturamento:
         # OBTENDO O VALOR
         result_faturamento = values_faturamento.strip().replace(" ", ".")
 
-        return [result_month, result_year, result_faturamento]
+        return [result_year, result_month, result_faturamento]
 
     @staticmethod
     def get_result_faturamento_format_dict_list(list_result_faturamento, pattern=None):
@@ -328,7 +328,11 @@ class Execute_Process_Tabela_Faturamento:
                     value = re.sub(pattern=pattern, repl="", string=value)
 
                 # SEPARANDO OS VALORES OBTIDOS POR ESPAÇO
-                result_split = value.split(" ")
+                result_split = (
+                    Execute_Process_Tabela_Faturamento.get_month_year_faturamento(
+                        values_faturamento=value
+                    )
+                )
 
                 # ADICIONANDO O RESULTADO DO SPLIT
                 result_years.append(result_split[0])
@@ -337,7 +341,7 @@ class Execute_Process_Tabela_Faturamento:
 
             # CONVERTENDO MULTIDIMENSIONAL LIST TO DICT
             result_values_faturamentos_dict = {
-                index: list(value)
+                index: dict(ano=value[0], mes=value[1], valor=value[2])
                 for index, value in enumerate(
                     list(zip(result_years, result_months, result_values_faturamentos))
                 )
@@ -490,8 +494,8 @@ class Execute_Process_Tabela_Faturamento:
 
         # INICIANDO AS VARIÁVEIS DE JSON RESULT
         json_result = {}
-        json_result["cnpj_cliente"] = ""
-        json_result["tabela_valores"] = ""
+        json_result[settings.NAME_FIELD_CNPJ] = ""
+        json_result[settings.NAME_FIELD_FATURAMENTO] = ""
 
         # OBTENDO A TABELA DE FATURAMENTO
         result_table = Execute_Process_Tabela_Faturamento.get_table_faturamento(
@@ -507,7 +511,7 @@ class Execute_Process_Tabela_Faturamento:
 
         # FORMATANDO O RESULTADO OBTIDO - TABELA DE FATURAMENTO
         (
-            json_result["tabela_valores"],
+            json_result[settings.NAME_FIELD_FATURAMENTO],
             result_years,
             result_months,
             result_values_faturamento,
@@ -516,7 +520,7 @@ class Execute_Process_Tabela_Faturamento:
         )
 
         return (
-            json_result["tabela_valores"],
+            json_result[settings.NAME_FIELD_FATURAMENTO],
             result_years,
             result_months,
             result_values_faturamento,

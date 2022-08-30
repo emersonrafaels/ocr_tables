@@ -58,9 +58,6 @@ def orchestra_extract_table_ocr(files: bytes = None):
             results = Extract_Table().main_extract_table(files)
 
         # EXECUTANDO O OCR
-        result_ocr, json_result = Execute_OCR().execute_pipeline_ocr(results)
+        json_result = Execute_OCR().execute_pipeline_ocr(results)[0]
 
-        print("RESULTADO OBTIDO:\n{}".format(result_ocr))
-        print("JSON_RESULT:\n{}".format(json_result))
-
-    return result_ocr, json_result
+    return json_result

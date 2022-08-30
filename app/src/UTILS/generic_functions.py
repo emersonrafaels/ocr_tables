@@ -14,6 +14,7 @@ __author__ = """Emerson V. Rafael (EMERVIN)"""
 __data_atualizacao__ = "04/07/2021"
 
 
+from collections import OrderedDict
 import datetime
 from inspect import stack
 from os import path, makedirs, walk, getcwd
@@ -21,6 +22,7 @@ import time
 from typing import Union
 from unidecode import unidecode
 import re
+
 
 import pandas as pd
 from numpy import array
@@ -165,6 +167,27 @@ def convert_list_bi_to_unidimensional(list_bid: Union[tuple, list]) -> list:
         list_uni_result = list_bid
 
     return list_uni_result
+
+
+def drop_duplicates_list(list_values: list) -> list:
+
+    """
+
+    REMOVE DUPLICIDADES EM UMA LISTA DE VALORES
+
+    # Arguments
+        list_values                - Required : Lista de input. (List)
+
+    # Returns
+        list_without_duplicates    - Required : Lista sem duplicidades. (List)
+
+    """
+
+    if not isinstance(list_values, (tuple, list)):
+
+        list_values = list_values.split()
+
+    return list(OrderedDict.fromkeys(list_values))
 
 
 def has_number(value_test: str) -> bool:

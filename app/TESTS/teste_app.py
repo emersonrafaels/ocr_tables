@@ -9,4 +9,5 @@ files = (
 # REALIZANDO O OCR
 result = orchestra_extract_table_ocr(image_to_base64(files))
 
-print(result)
+print("TEXTO OBTIDO: {}".format(result["text"]))
+print("VALORES OBTIDOS: {}".format(result["campos"]))
