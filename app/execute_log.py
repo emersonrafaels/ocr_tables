@@ -144,10 +144,7 @@ def startLog() -> bool:
     return validator
 
 
-def on_log(msg: str = "",
-           origin: str = None,
-           image: str = None,
-           idt: str = None):
+def on_log(msg: str = "", origin: str = None, image: str = None, idt: str = None):
 
     """
 
@@ -175,11 +172,13 @@ def on_log(msg: str = "",
         print("ERRO NA FUNÇÃO {} - {]".format(stack()[0][3], ex))
 
 
-def start(msg: str = "",
-          origin: str = None,
-          image: str = None,
-          idt: str = None,
-          start_time: str = None):
+def start(
+    msg: str = "",
+    origin: str = None,
+    image: str = None,
+    idt: str = None,
+    start_time: str = None,
+):
 
     """
 
@@ -208,11 +207,13 @@ def start(msg: str = "",
         print("ERRO NA FUNÇÃO {} - {]".format(stack()[0][3], ex))
 
 
-def end(msg: str = "",
-        origin: str = None,
-        image: str = None,
-        idt: str = None,
-        end_time: str = None):
+def end(
+    msg: str = "",
+    origin: str = None,
+    image: str = None,
+    idt: str = None,
+    end_time: str = None,
+):
 
     """
 
@@ -241,10 +242,7 @@ def end(msg: str = "",
         print("ERRO NA FUNÇÃO {} - {]".format(stack()[0][3], ex))
 
 
-def error(msg: str = "",
-           origin: str = None,
-           image: str = None,
-           idt: str = None):
+def error(msg: str = "", origin: str = None, image: str = None, idt: str = None):
 
     """
 
@@ -272,10 +270,7 @@ def error(msg: str = "",
         print("ERRO NA FUNÇÃO {} - {]".format(stack()[0][3], ex))
 
 
-def warnings(msg: str = "",
-           origin: str = None,
-           image: str = None,
-           idt: str = None):
+def warnings(msg: str = "", origin: str = None, image: str = None, idt: str = None):
 
     """
 
@@ -303,10 +298,7 @@ def warnings(msg: str = "",
         print("ERRO NA FUNÇÃO {} - {]".format(stack()[0][3], ex))
 
 
-def info(msg: str = "",
-           origin: str = None,
-           image: str = None,
-           idt: str = None):
+def info(msg: str = "", origin: str = None, image: str = None, idt: str = None):
 
     """
 

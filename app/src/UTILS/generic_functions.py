@@ -51,8 +51,9 @@ def verify_exists(dir: str) -> bool:
     return validator
 
 
-def get_files_directory(directory: str,
-                        format_types_accepted: Union[tuple, list]) -> list:
+def get_files_directory(
+    directory: str, format_types_accepted: Union[tuple, list]
+) -> list:
 
     """
 
@@ -185,9 +186,7 @@ def has_number(value_test: str) -> bool:
 
     try:
         # REALIZANDO A VERIFICAÇÃO
-        if len(re.sub(pattern=pattern_number,
-                      string=str(value_test),
-                      repl="")) > 0:
+        if len(re.sub(pattern=pattern_number, string=str(value_test), repl="")) > 0:
             # A STRING POSSUI NÚMEROS
             return True
     except Exception as ex:
@@ -260,8 +259,7 @@ def read_csv(data_dir: str) -> [bool, pd.DataFrame]:
     return validator, dataframe
 
 
-def save_excel(dataframe_to_save: pd.DataFrame,
-               data_dir: str) -> bool:
+def save_excel(dataframe_to_save: pd.DataFrame, data_dir: str) -> bool:
 
     """
 
@@ -322,8 +320,9 @@ def get_date_time_now(return_type: str) -> str:
         return datetime.datetime.now()
 
 
-def order_list_with_arguments(list_values: Union[tuple, list],
-                              number_column_order: int = 1, limit: int = 1) -> list:
+def order_list_with_arguments(
+    list_values: Union[tuple, list], number_column_order: int = 1, limit: int = 1
+) -> list:
 
     """
 
@@ -379,9 +378,9 @@ def order_list_with_arguments(list_values: Union[tuple, list],
     return return_list
 
 
-def remove_line_with_black_list_words(text: str,
-                                      list_words: list = [],
-                                      mode: str = "FIND") -> str:
+def remove_line_with_black_list_words(
+    text: str, list_words: list = [], mode: str = "FIND"
+) -> str:
 
     """
 
@@ -435,8 +434,7 @@ def remove_line_with_black_list_words(text: str,
     return return_text
 
 
-def verify_find_intersection(data_verified: str,
-                             data_lists: list) -> bool:
+def verify_find_intersection(data_verified: str, data_lists: list) -> bool:
 
     """
 

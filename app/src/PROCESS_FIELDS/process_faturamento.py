@@ -35,9 +35,11 @@ from typing import Union
 
 from app import execute_log
 from app.src.UTILS.combinations import all_combinations
-from app.src.UTILS.extract_infos import (get_matchs_line,
-                                         get_matchs_strings,
-                                         get_similitary)
+from app.src.UTILS.extract_infos import (
+    get_matchs_line,
+    get_matchs_strings,
+    get_similitary,
+)
 from app.src.UTILS.generic_functions import (
     verify_find_intersection,
     has_number,
@@ -177,20 +179,26 @@ class Execute_Process_Tabela_Faturamento:
         result_month = result_year = result_faturamento = ""
 
         # OBTENDO O MÊS
-        result_pattern_month = get_matchs_strings(text=values_faturamento,
-                                                  field_pattern=settings.PATTERN_FATURAMENTO_1)
+        result_pattern_month = get_matchs_strings(
+            text=values_faturamento, field_pattern=settings.PATTERN_FATURAMENTO_1
+        )
 
         if result_pattern_month:
-            result_month = values_faturamento[values_faturamento.find(result_pattern_month[0][2]):].split(" ")[0]
+            result_month = values_faturamento[
+                values_faturamento.find(result_pattern_month[0][2]) :
+            ].split(" ")[0]
 
             values_faturamento = values_faturamento.replace(result_month, " ")
 
         # OBTENDO O ANO
-        result_pattern_year = get_matchs_strings(text=values_faturamento,
-                                                 field_pattern=settings.PATTERN_YEAR)
+        result_pattern_year = get_matchs_strings(
+            text=values_faturamento, field_pattern=settings.PATTERN_YEAR
+        )
 
         if result_pattern_year:
-            result_year = values_faturamento[values_faturamento.find(result_pattern_year[0][2]):].split(" ")[0]
+            result_year = values_faturamento[
+                values_faturamento.find(result_pattern_year[0][2]) :
+            ].split(" ")[0]
 
             values_faturamento = values_faturamento.replace(result_year, " ")
 
@@ -246,7 +254,11 @@ class Execute_Process_Tabela_Faturamento:
                 value = " ".join(filter(lambda x: x, value.split(" ")))
 
                 # SEPARANDO OS VALORES OBIDOS POR ESPAÇO
-                result_split = Execute_Process_Tabela_Faturamento.get_month_year_faturamento(values_faturamento=value)
+                result_split = (
+                    Execute_Process_Tabela_Faturamento.get_month_year_faturamento(
+                        values_faturamento=value
+                    )
+                )
 
                 # ADICIONANDO O RESULTADO DO SPLIT
                 result_years.append(result_split[0])
@@ -384,9 +396,9 @@ class Execute_Process_Tabela_Faturamento:
 
         return list_filter_result
 
-    def pos_processing_faturamento(self,
-                                   table_faturamento,
-                                   pattern_faturamento_valid_caracters):
+    def pos_processing_faturamento(
+        self, table_faturamento, pattern_faturamento_valid_caracters
+    ):
 
         """
 
@@ -416,9 +428,11 @@ class Execute_Process_Tabela_Faturamento:
 
             # MANTENDO APENAS OS CARACTERES ACEITOS NO CAMPO DE FATURAMENTO
             # MANTENDO APENAQS OS NÚMEROS DO CNPJ DE INPUT
-            value_faturamento = re.sub(pattern=pattern_faturamento_valid_caracters,
-                                       repl="",
-                                       string=value_faturamento)
+            value_faturamento = re.sub(
+                pattern=pattern_faturamento_valid_caracters,
+                repl="",
+                string=value_faturamento,
+            )
 
             # ETAPA 1 - VALIDANDO AS LINHAS QUE POSSUEM MESES VÁLIDOS
             validator_function_month = (
@@ -486,8 +500,9 @@ class Execute_Process_Tabela_Faturamento:
 
         # REALIZANDO O PÓS PROCESSAMENTO DA TABELA DE FATURAMENTO
         result_table = Execute_Process_Tabela_Faturamento.pos_processing_faturamento(
-            self, table_faturamento=result_table,
-            pattern_faturamento_valid_caracters=settings.PATTERN_DIF_LETTERS_NUMBERS_DOT_COMMA
+            self,
+            table_faturamento=result_table,
+            pattern_faturamento_valid_caracters=settings.PATTERN_DIF_LETTERS_NUMBERS_DOT_COMMA,
         )
 
         # FORMATANDO O RESULTADO OBTIDO - TABELA DE FATURAMENTO
