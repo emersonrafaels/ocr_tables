@@ -29,48 +29,51 @@ import numpy as np
 
 from app import execute_log
 from app.src.UTILS.extract_infos import get_matchs_line, get_similitary
-from app.src.UTILS.generic_functions import remove_line_with_black_list_words, lista_bi_to_uni
+from app.src.UTILS.generic_functions import (
+    remove_line_with_black_list_words,
+    convert_list_bi_to_unidimensional,
+)
 
 
-class Execute_Process_CNPJ():
-
+class Execute_Process_CNPJ:
     def __init__(self):
 
         pass
-
 
     @staticmethod
     def pos_processing_cnpj(text_input, pattern, validator_only_numbers=False):
 
         """
 
-            FORMATA O CNPJ OBTIDO DA CARTA DE FATURAMENTO
+        FORMATA O CNPJ OBTIDO DA CARTA DE FATURAMENTO
 
-            # Arguments
-                text_input                - Required : Texto de input (String)
-                pattern                   - Required : Pattern de formatação a ser utilizado (String)
-                validator_only_numbers    - Optional : Caso True, retorna o CNPJ apenas de forma numérica.
-                                                       Sem utilizar '-', '.', '/'. (Boolean)
+        # Arguments
+            text_input                - Required : Texto de input (String)
+            pattern                   - Required : Pattern de formatação a ser utilizado (String)
+            validator_only_numbers    - Optional : Caso True, retorna o CNPJ apenas de forma numérica.
+                                                   Sem utilizar '-', '.', '/'. (Boolean)
 
-            # Returns
-                result_cnpj             - Required : Resultado da formatação (String)
+        # Returns
+            result_cnpj             - Required : Resultado da formatação (String)
 
         """
 
         try:
             # MANTENDO APENAQS OS NÚMEROS DO CNPJ DE INPUT
-            text_input_only_numbers = re.sub(pattern=pattern,
-                                             repl="",
-                                             string=text_input)
+            text_input_only_numbers = re.sub(
+                pattern=pattern, repl="", string=text_input
+            )
 
             if not validator_only_numbers:
 
                 # FORMATANDO O CNPJ OBTIDO
-                result_cnpj = "{}.{}.{}/{}-{}".format(text_input_only_numbers[:2],
-                                                      text_input_only_numbers[2:5],
-                                                      text_input_only_numbers[5:8],
-                                                      text_input_only_numbers[8:12],
-                                                      text_input_only_numbers[12:])
+                result_cnpj = "{}.{}.{}/{}-{}".format(
+                    text_input_only_numbers[:2],
+                    text_input_only_numbers[2:5],
+                    text_input_only_numbers[5:8],
+                    text_input_only_numbers[8:12],
+                    text_input_only_numbers[12:],
+                )
 
                 return result_cnpj
 
@@ -82,23 +85,23 @@ class Execute_Process_CNPJ():
 
             return text_input
 
-
     def get_best_match(self, list_cnpjs, limit):
 
         """
 
-            CLASSE PARA OBTER OS MELHORES MATCHS CONFORME LIMITE
+        CLASSE PARA OBTER OS MELHORES MATCHS CONFORME LIMITE
 
-            # Arguments
-                list_cnpjs             - Required : Texto a ser analisado (String)
-                limit                  - Optional : Quantidade de limites
-                                                    desejados (Integer)
+        # Arguments
+            list_cnpjs             - Required : Texto a ser analisado (String)
+            limit                  - Optional : Quantidade de limites
+                                                desejados (Integer)
 
-            # Returns
-                list_best_cnpjs       - Required : CNPJs (List)
+        # Returns
+            list_best_cnpjs       - Required : CNPJs (List)
 
         """
 
+        # INICIANDO A VARIÁVEL QUE ARMAZENARÁ O CNPJ COM MELHOR MATCH
         list_best_cnpjs = []
 
         # PERCORRENDO A LISTA E OBTENDO A SOMA DE FUZZYS
@@ -110,33 +113,32 @@ class Execute_Process_CNPJ():
 
         return list_best_cnpjs
 
-
-    def get_result_cnpjs(self, text, pattern,
-                         range_error_pattern=[1, 1], words_black_list=[],
-                         limit=1):
+    def get_result_cnpjs(
+        self, text, pattern, range_error_pattern=[1, 1], words_black_list=[], limit=1
+    ):
 
         """
 
-            CLASSE PARA PROCESSAMENTO DOS CAMPOS DE FORMATO CNPJ.
+        CLASSE PARA PROCESSAMENTO DOS CAMPOS DE FORMATO CNPJ.
 
-            POSSUI FUNÇÕES PARA:
-                1) FILTRAR LINHAS DO TEXTO QUE CONTÉM PALAVRAS NÃO DESEJADAS
-                2) OBTER CNPJS NO TEXTO
-                3) OBTER OS CNPJ COM OS MAIORES MATCHS
+        POSSUI FUNÇÕES PARA:
+            1) FILTRAR LINHAS DO TEXTO QUE CONTÉM PALAVRAS NÃO DESEJADAS
+            2) OBTER CNPJS NO TEXTO
+            3) OBTER OS CNPJ COM OS MAIORES MATCHS
 
-            # Arguments
-                text                   - Required : Texto a ser analisado (String)
-                pattern                - Required : Pattern a ser utilizado para
-                                                    obtenção dos cnpjs (Regex)
-                range_error_pattern    - Optional : Número de erroos
-                                                    aceitos no pattern (List)
-                words_black_list       - Optional : Palavras que não
-                                                    devem constar na linha (List)
-                limit                  - Optional : Quantidade de limites
-                                                    desejados (Integer)
+        # Arguments
+            text                   - Required : Texto a ser analisado (String)
+            pattern                - Required : Pattern a ser utilizado para
+                                                obtenção dos cnpjs (Regex)
+            range_error_pattern    - Optional : Número de erroos
+                                                aceitos no pattern (List)
+            words_black_list       - Optional : Palavras que não
+                                                devem constar na linha (List)
+            limit                  - Optional : Quantidade de limites
+                                                desejados (Integer)
 
-            # Returns
-                result_cnpjs           - Required : CNPJ's obtidos (List)
+        # Returns
+            result_cnpjs           - Required : CNPJ's obtidos (List)
 
         """
 
@@ -164,10 +166,12 @@ class Execute_Process_CNPJ():
         text = remove_line_with_black_list_words(text=text, list_words=words_black_list)
 
         try:
-            for n_error in np.arange(np.min(range_error_pattern), np.max(range_error_pattern)+1):
+            for n_error in np.arange(
+                np.min(range_error_pattern), np.max(range_error_pattern) + 1
+            ):
 
                 # FORMATANDO O PATTERN
-                pattern_error = pattern.replace('n_error', str(n_error))
+                pattern_error = pattern.replace("n_error", str(n_error))
 
                 # OBTENDO CNPJS
                 cnpjs_matchs = get_matchs_line(text=text, field_pattern=pattern_error)
@@ -176,12 +180,19 @@ class Execute_Process_CNPJ():
                 list_cnpjs += cnpjs_matchs
 
             # OBTENDO O VALOR COM MELHOR MATCH
-            result_cnpjs = Execute_Process_CNPJ.get_best_match(self, list_cnpjs=list_cnpjs, limit=limit)
+            result_cnpjs = Execute_Process_CNPJ.get_best_match(
+                self, list_cnpjs=list_cnpjs, limit=limit
+            )
 
             # FORMATANDO O RESULTADO OBTIDO - CNPJ
-            result_cnpjs = [Execute_Process_CNPJ.pos_processing_cnpj(value[3],
-                                                                     settings.PATTERN_ONLY_NUMBERS,
-                                                                     validator_only_numbers=settings.CNPJ_ONLY_NUMBERS) for value in result_cnpjs]
+            result_cnpjs = [
+                Execute_Process_CNPJ.pos_processing_cnpj(
+                    value[3],
+                    settings.PATTERN_ONLY_NUMBERS,
+                    validator_only_numbers=settings.CNPJ_ONLY_NUMBERS,
+                )
+                for value in result_cnpjs
+            ]
 
         except Exception as ex:
             print("ERRO NA FUNÇÃO {} - {}".format(stack()[0][3], ex))

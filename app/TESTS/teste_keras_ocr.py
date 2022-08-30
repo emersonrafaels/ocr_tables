@@ -5,20 +5,20 @@ def get_text(predictions):
 
     """
 
-        APÓS A REALIZAÇÃO DO OCR COMPLETO (POR BOUNDING BOX),
-        UTILIZANDO O KERAS_OCR
-        ESSA FUNÇÃO CONCATENA O TEXTO, RESULTANDO EM UMA ÚNICA STRING.
+    APÓS A REALIZAÇÃO DO OCR COMPLETO (POR BOUNDING BOX),
+    UTILIZANDO O KERAS_OCR
+    ESSA FUNÇÃO CONCATENA O TEXTO, RESULTANDO EM UMA ÚNICA STRING.
 
-        CONVERTE O RESULTADO DO OCR COMPLETO (IMAGE DATA)
-        EM UM FORMATO LEGÍVEL:
-            1) TEXT: STRING CONTENDO O TEXTO DO OCR OBTIDO
-            2) PREDICTIONS: List CONTENDO AS INFORMAÇÕES DO OCR (List)
+    CONVERTE O RESULTADO DO OCR COMPLETO (IMAGE DATA)
+    EM UM FORMATO LEGÍVEL:
+        1) TEXT: STRING CONTENDO O TEXTO DO OCR OBTIDO
+        2) PREDICTIONS: List CONTENDO AS INFORMAÇÕES DO OCR (List)
 
-        # Arguments
-            predictions                   - Required : Informações obtidas no OCR (List)
-        # Returns
-            text_result                   - Required : Texto resultante (String)
-            predictions                   - Required : Informações obtidas no OCR (List)
+    # Arguments
+        predictions                   - Required : Informações obtidas no OCR (List)
+    # Returns
+        text_result                   - Required : Texto resultante (String)
+        predictions                   - Required : Informações obtidas no OCR (List)
 
     """
 
@@ -45,7 +45,9 @@ def get_text(predictions):
 pipeline = keras_ocr.pipeline.Pipeline()
 
 # Get a set of three example images
-images = [r"C:\Users\Emerson\Desktop\brainIAcs\MASSA_IMAGENS\CARTAS DE FATURAMENTO\Carta5.PNG"]
+images = [
+    r"C:\Users\Emerson\Desktop\brainIAcs\MASSA_IMAGENS\CARTAS DE FATURAMENTO\Carta5.PNG"
+]
 
 # Each list of predictions in prediction_groups is a list of
 # (word, box) tuples.

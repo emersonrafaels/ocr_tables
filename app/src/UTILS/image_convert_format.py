@@ -41,14 +41,14 @@ def open_image_pil(image):
 
     """
 
-        ESSA FUNÇÃO TEM COMO OBJETIVO, CONVETER STR -> FORMATO DE IMAGEM (PIL)
+    ESSA FUNÇÃO TEM COMO OBJETIVO, CONVETER STR -> FORMATO DE IMAGEM (PIL)
 
-        # Arguments
-            image                      - Required : Imagem atual antes da formatação
-                                                    Imagem no formato caminho da imagem (String)
+    # Arguments
+        image                      - Required : Imagem atual antes da formatação
+                                                Imagem no formato caminho da imagem (String)
 
-        # Returns
-            img_pil                    - Required : Imagem convertida para formato PIL (PIL)
+    # Returns
+        img_pil                    - Required : Imagem convertida para formato PIL (PIL)
 
     """
 
@@ -67,20 +67,20 @@ def base64_to_pil(image):
 
     """
 
-        OS ESQUEMAS DE CODIFICAÇÃO BASE64 SÃO COMUMENTE USADOS QUANDO
-        HÁ NECESSIDADE DE CODIFICAR DADOS BINÁRIOS, ESPECIALMENTE QUANDO
-        ESSES DADOS PRECISAM SER ARMAZENADOS E TRANSFERIDOS POR MEIO DE MÍDIA
-        PROJETADA PARA LIDAR COM TEXTO. ESSA CODIFICAÇÃO AJUDA A GARANTIR
-        QUE OS DADOS PERMANEÇAM INTACTOS SEM MODIFICAÇÃO DURANTE O TRANSPORTE.
+    OS ESQUEMAS DE CODIFICAÇÃO BASE64 SÃO COMUMENTE USADOS QUANDO
+    HÁ NECESSIDADE DE CODIFICAR DADOS BINÁRIOS, ESPECIALMENTE QUANDO
+    ESSES DADOS PRECISAM SER ARMAZENADOS E TRANSFERIDOS POR MEIO DE MÍDIA
+    PROJETADA PARA LIDAR COM TEXTO. ESSA CODIFICAÇÃO AJUDA A GARANTIR
+    QUE OS DADOS PERMANEÇAM INTACTOS SEM MODIFICAÇÃO DURANTE O TRANSPORTE.
 
-        ESSA FUNÇÃO TEM COMO OBJETIVO, CONVETER BASE64 -> FORMATO DE IMAGEM (PIL)
+    ESSA FUNÇÃO TEM COMO OBJETIVO, CONVETER BASE64 -> FORMATO DE IMAGEM (PIL)
 
-        # Arguments
-            image                  - Required : Imagem que será decodificada
-                                                de base64 (Base64)
+    # Arguments
+        image                  - Required : Imagem que será decodificada
+                                            de base64 (Base64)
 
-        # Returns
-            img_pil                - Required : Imagem convertida para formato PIL (PIL)
+    # Returns
+        img_pil                - Required : Imagem convertida para formato PIL (PIL)
 
     """
 
@@ -89,7 +89,7 @@ def base64_to_pil(image):
 
     try:
         img_str = io.BytesIO(base64.b64encode(image))
-        img_pil = Image.open(img_str, mode='r')
+        img_pil = Image.open(img_str, mode="r")
 
     except Exception as ex:
         print("ERRO NA FUNÇÃO: {} - {}".format(stack()[0][3], ex))
@@ -101,17 +101,17 @@ def array_to_pil(image):
 
     """
 
-        CRIA UMA MEMÓRIA DA IMAGEM A PARTIR DE UM OBJETO QUE EXPORTA
-        A INTERFACE DO ARRAY (USANDO O PROTOCOLO DE BUFFER).
+    CRIA UMA MEMÓRIA DA IMAGEM A PARTIR DE UM OBJETO QUE EXPORTA
+    A INTERFACE DO ARRAY (USANDO O PROTOCOLO DE BUFFER).
 
-        ESSA FUNÇÃO TEM COMO OBJETIVO, CONVETER ARRAY -> FORMATO DE IMAGEM (PIL)
+    ESSA FUNÇÃO TEM COMO OBJETIVO, CONVETER ARRAY -> FORMATO DE IMAGEM (PIL)
 
-        # Arguments
-            image                 - Required : Imagem atual antes da formatação
-                                                Imagem no formato Array (Array)
+    # Arguments
+        image                 - Required : Imagem atual antes da formatação
+                                            Imagem no formato Array (Array)
 
-        # Returns
-            img_pil                - Required : Imagem convertida para formato PIL (PIL)
+    # Returns
+        img_pil                - Required : Imagem convertida para formato PIL (PIL)
 
     """
 
@@ -119,7 +119,7 @@ def array_to_pil(image):
     img_pil = "null"
 
     try:
-        img_pil = Image.fromarray(image, mode='r')
+        img_pil = Image.fromarray(image, mode="r")
 
     except Exception as ex:
         # print("ERRO NA FUNÇÃO: {} - {}".format(stack()[0][3], ex))
@@ -133,19 +133,19 @@ def str_to_base64(image):
 
     """
 
-        OS ESQUEMAS DE CODIFICAÇÃO BASE64 SÃO COMUMENTE USADOS QUANDO
-        HÁ NECESSIDADE DE CODIFICAR DADOS BINÁRIOS, ESPECIALMENTE QUANDO
-        ESSES DADOS PRECISAM SER ARMAZENADOS E TRANSFERIDOS POR MEIO DE MÍDIA
-        PROJETADA PARA LIDAR COM TEXTO. ESSA CODIFICAÇÃO AJUDA A GARANTIR
-        QUE OS DADOS PERMANEÇAM INTACTOS SEM MODIFICAÇÃO DURANTE O TRANSPORTE.
+    OS ESQUEMAS DE CODIFICAÇÃO BASE64 SÃO COMUMENTE USADOS QUANDO
+    HÁ NECESSIDADE DE CODIFICAR DADOS BINÁRIOS, ESPECIALMENTE QUANDO
+    ESSES DADOS PRECISAM SER ARMAZENADOS E TRANSFERIDOS POR MEIO DE MÍDIA
+    PROJETADA PARA LIDAR COM TEXTO. ESSA CODIFICAÇÃO AJUDA A GARANTIR
+    QUE OS DADOS PERMANEÇAM INTACTOS SEM MODIFICAÇÃO DURANTE O TRANSPORTE.
 
-        ESSA FUNÇÃO TEM COMO OBJETIVO, CONVETER STR -> BASE64
+    ESSA FUNÇÃO TEM COMO OBJETIVO, CONVETER STR -> BASE64
 
-        # Arguments
-            image                  - Required : Imagem que será decodificada de base 64 (Base64)
+    # Arguments
+        image                  - Required : Imagem que será decodificada de base 64 (Base64)
 
-        # Returns
-            img_pil                - Required : Imagem convertida para formato PIL (PIL)
+    # Returns
+        img_pil                - Required : Imagem convertida para formato PIL (PIL)
 
     """
 
@@ -165,20 +165,20 @@ def orchestra_read_image(image):
 
     """
 
-        ORQUESTRA A CONVERSÃO DE IMAGEM ENTRE FORMATOS.
+    ORQUESTRA A CONVERSÃO DE IMAGEM ENTRE FORMATOS.
 
-        A IMAGEM ORIGINAL PODE ESTAR NOS FORMATOS: BASE64, STR, ARRAY, FORMATO DE IMAGEM (PIL).
+    A IMAGEM ORIGINAL PODE ESTAR NOS FORMATOS: BASE64, STR, ARRAY, FORMATO DE IMAGEM (PIL).
 
-        A SAÍDA DA IMAGEM É NO FORMATO PIL.
+    A SAÍDA DA IMAGEM É NO FORMATO PIL.
 
-        # Arguments
-            image                  - Required : Imagem que será convertida.
-                                                A imagem pode estar em formato PIL,
-                                                array, base64 ou string (PIL | Array |
-                                                                         Base64 | String)
+    # Arguments
+        image                  - Required : Imagem que será convertida.
+                                            A imagem pode estar em formato PIL,
+                                            array, base64 ou string (PIL | Array |
+                                                                     Base64 | String)
 
-        # Returns
-            img_pil                - Required : Imagem em formato PIL (PIL)
+    # Returns
+        img_pil                - Required : Imagem em formato PIL (PIL)
 
     """
 
@@ -191,10 +191,10 @@ def orchestra_read_image(image):
         if type(image) == bytes:
 
             """
-            
-                A IMAGEM ESTÁ EM FORMATO DE BYTES (BASE64)
-                CONVERTE BASE64 -> PIL
-            
+
+            A IMAGEM ESTÁ EM FORMATO DE BYTES (BASE64)
+            CONVERTE BASE64 -> PIL
+
             """
 
             img_pil = base64_to_pil(image)
@@ -203,8 +203,8 @@ def orchestra_read_image(image):
 
             """
 
-                A IMAGEM ESTÁ EM FORMATO DE STRING
-                CONVERTE STRING -> ARRAY
+            A IMAGEM ESTÁ EM FORMATO DE STRING
+            CONVERTE STRING -> ARRAY
 
             """
 
@@ -213,13 +213,12 @@ def orchestra_read_image(image):
 
             return imagem
 
-
         elif type(image) is np.ndarray:
 
             """
 
-                A IMAGEM ESTÁ EM FORMATO DE ARRAY
-                CONVERTE ARRAY -> PIL
+            A IMAGEM ESTÁ EM FORMATO DE ARRAY
+            CONVERTE ARRAY -> PIL
 
             """
 
@@ -233,13 +232,3 @@ def orchestra_read_image(image):
 
     # RETORNANDO A IMAGEM CONVERTIDA
     return img_pil
-
-
-
-
-
-
-
-
-
-

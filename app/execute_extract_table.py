@@ -31,48 +31,46 @@ from dynaconf import settings
 
 try:
     import execute_log
-    from src.PROCESSINGS.model_pre_processing import Image_Pre_Processing
-    from src.UTILS.image_read import read_image_gray
-    from src.UTILS.base64_encode_decode import isbase64, base64_to_image
-    from src.UTILS import generic_functions
+    from app.src.PROCESSINGS.model_pre_processing import Image_Pre_Processing
+    from app.src.UTILS.image_read import read_image_gray
+    from app.src.UTILS.base64_encode_decode import isbase64, base64_to_image
+    from app.src.UTILS import generic_functions
 except ModuleNotFoundError:
-    sys.path.append(path.join(str(Path(__file__).resolve().parent.parent), "app"))
+    sys.path.append(os.path.join(str(Path(__file__).resolve().parent.parent), "app"))
     import execute_log
-    from src.PROCESSINGS.model_pre_processing import Image_Pre_Processing
-    from src.UTILS.image_read import read_image_gray
-    from src.UTILS.base64_encode_decode import isbase64, base64_to_image
-    from src.UTILS import generic_functions
+    from app.src.PROCESSINGS.model_pre_processing import Image_Pre_Processing
+    from app.src.UTILS.image_read import read_image_gray
+    from app.src.UTILS.base64_encode_decode import isbase64, base64_to_image
+    from app.src.UTILS import generic_functions
 
 
-class Extract_Table():
-
+class Extract_Table:
     def __init__(self):
 
         pass
-
 
     @staticmethod
     def orchestra_get_files(input_file):
 
         """
 
-            FUNÇÃO PARA ORQUESTRAR A OBTENÇÃO DOS ARQUIVOS NO QUAL A API DEVE ATUAR.
+        FUNÇÃO PARA ORQUESTRAR A OBTENÇÃO DOS ARQUIVOS NO QUAL A API DEVE ATUAR.
 
-            PODE SER ENVIADO:
-            1) CAMINHO DE UM ARQUIVO ESPECÍFICO
-            2) DIRETÓRIO CONTENDO VÁRIOS ARQUIVOS
-            3) INPUT EM BASE64
+        PODE SER ENVIADO:
+        1) CAMINHO DE UM ARQUIVO ESPECÍFICO
+        2) DIRETÓRIO CONTENDO VÁRIOS ARQUIVOS
+        3) INPUT EM BASE64
 
-            ESSA FUNÇÃO É RESPONSÁVEL POR CHAMAR A FUNÇÃO DE OBTER TODOS OS ARQUIVOS NO DIRETÓRIO,
-            CASO SEJA ENVIADO UM DIRETÓRIO.
+        ESSA FUNÇÃO É RESPONSÁVEL POR CHAMAR A FUNÇÃO DE OBTER TODOS OS ARQUIVOS NO DIRETÓRIO,
+        CASO SEJA ENVIADO UM DIRETÓRIO.
 
-            # Arguments
-                input_file                       - Required : Caminho do(s) arquivo(s) a serme lidos.
-                                                              Pode ser enviado um Path (String) ou Base64 (String)
-                input_type                      - Required : Tipo do input (String)
+        # Arguments
+            input_file                       - Required : Caminho do(s) arquivo(s) a serme lidos.
+                                                          Pode ser enviado um Path (String) ou Base64 (String)
+            input_type                      - Required : Tipo do input (String)
 
-            # Returns
-                list_files_result                - Required : Caminho do(s) arquivo(s) listados. (List)
+        # Returns
+            list_files_result                - Required : Caminho do(s) arquivo(s) listados. (List)
 
         """
 
@@ -91,7 +89,9 @@ class Extract_Table():
 
             input_type = "BYTES"
 
-            execute_log.info("INICIANDO PROCESSO DE OBTENÇÃO DO ARQUIVO - {}".format(input_type))
+            execute_log.info(
+                "INICIANDO PROCESSO DE OBTENÇÃO DO ARQUIVO - {}".format(input_type)
+            )
 
             return input_type, [base64_to_image(result_base64)]
 
@@ -101,7 +101,9 @@ class Extract_Table():
 
             input_type = "ARCHIVE"
 
-            execute_log.info("INICIANDO PROCESSO DE OBTENÇÃO DO ARQUIVO - {}".format(input_type))
+            execute_log.info(
+                "INICIANDO PROCESSO DE OBTENÇÃO DO ARQUIVO - {}".format(input_type)
+            )
 
             return input_type, [input_file]
 
@@ -111,9 +113,13 @@ class Extract_Table():
             # O RETORNO É BASE64
             input_type = "BYTES"
 
-            execute_log.info("INICIANDO PROCESSO DE OBTENÇÃO DO ARQUIVO - {}".format(input_type))
+            execute_log.info(
+                "INICIANDO PROCESSO DE OBTENÇÃO DO ARQUIVO - {}".format(input_type)
+            )
 
-            return input_type, [base64_to_image(file) for file in input_file if type(file) == bytes]
+            return input_type, [
+                base64_to_image(file) for file in input_file if type(file) == bytes
+            ]
 
         else:
             # O INPUT É UM DIRETÓRIO
@@ -121,26 +127,28 @@ class Extract_Table():
 
             input_type = "DIRECTORY"
 
-            execute_log.info("INICIANDO PROCESSO DE OBTENÇÃO DO ARQUIVO - {}".format(input_type))
+            execute_log.info(
+                "INICIANDO PROCESSO DE OBTENÇÃO DO ARQUIVO - {}".format(input_type)
+            )
 
-            return input_type, generic_functions.get_files_directory(input_file,
-                                                                     settings.FORMAT_TYPES_ACCEPTED)
-
+            return input_type, generic_functions.get_files_directory(
+                input_file, settings.FORMAT_TYPES_ACCEPTED
+            )
 
     def main_extract_table(self, input_images):
 
         """
 
-            ORQUESTRA A OBTENÇÃO DAS TABELAS CONTIDAS NA IMAGEM.
+        ORQUESTRA A OBTENÇÃO DAS TABELAS CONTIDAS NA IMAGEM.
 
-            CASO ENCONTRE AS TABELAS, SALVA CADA UMA DAS IMAGENS
-            PERMITINDO A UTILIZAÇÃO NO MODELO DE OCR.
+        CASO ENCONTRE AS TABELAS, SALVA CADA UMA DAS IMAGENS
+        PERMITINDO A UTILIZAÇÃO NO MODELO DE OCR.
 
-            # Arguments
-                input_images            - Required : Lista de imagens para processamento (List)
+        # Arguments
+            input_images            - Required : Lista de imagens para processamento (List)
 
-            # Returns
-                results                - Required : Resultado de modelo (List)
+        # Returns
+            results                - Required : Resultado de modelo (List)
 
         """
 
@@ -179,8 +187,9 @@ class Extract_Table():
                 if len(tables) > 0:
 
                     # DEFININDO O DIRETÓRIO PARA SAVE DAS TABELAS
-                    dir_save_tables = os.path.join(directory,
-                                                    filename_without_extension)
+                    dir_save_tables = os.path.join(
+                        directory, filename_without_extension
+                    )
 
                     execute_log.info("SALVANDO TABELAS EM: {}".format(dir_save_tables))
 
@@ -194,8 +203,7 @@ class Extract_Table():
                         table_filename = "{}{}{}".format("table_", idx_table, ".png")
 
                         # DEFININDO O DIRETÓRIO E NOME DE SAVE
-                        table_filepath = os.path.join(dir_save_tables,
-                                                      table_filename)
+                        table_filepath = os.path.join(dir_save_tables, table_filename)
 
                         # SALVANDO A IMAGEM
                         cv2.imwrite(table_filepath, table)
@@ -203,10 +211,15 @@ class Extract_Table():
                         # ARMAZENANDO O RESULTADO
                         # ARQUIVO DE INPUT (file)
                         # TABELAS OBTIDAS (list_result_tables)
-                        results.append({"image_file": image_file, "table": table_filepath})
+                        results.append(
+                            {"image_file": image_file, "table": table_filepath}
+                        )
 
-                        execute_log.info("TABELA - {} SALVA COM SUCESSO - {}".format(table_filename,
-                                                                                     table_filepath))
+                        execute_log.info(
+                            "TABELA - {} SALVA COM SUCESSO - {}".format(
+                                table_filename, table_filepath
+                            )
+                        )
 
                 # CASO NÃO ENCONTROU TABELAS
                 else:

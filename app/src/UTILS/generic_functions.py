@@ -18,6 +18,7 @@ import datetime
 from inspect import stack
 from os import path, makedirs, walk, getcwd
 import time
+from typing import Union
 from unidecode import unidecode
 import re
 
@@ -25,44 +26,45 @@ import pandas as pd
 from numpy import array
 
 
-def verify_exists(dir):
+def verify_exists(dir: str) -> bool:
 
     """
 
-        FUNÇÃO PARA VERIFICAR SE UM DIRETÓRIO (PATH) EXISTE.
+    FUNÇÃO PARA VERIFICAR SE UM DIRETÓRIO (PATH) EXISTE.
 
-        # Arguments
-            dir                  - Required : Diretório a ser verificado (String)
+    # Arguments
+        dir                  - Required : Diretório a ser verificado (String)
 
-        # Returns
-            validador            - Required : Validador da função (Boolean)
+    # Returns
+        validator            - Required : validator da função (Boolean)
 
     """
 
-    # INICIANDO O VALIDADOR DA FUNÇÃO
-    validador = False
+    # INICIANDO O validator DA FUNÇÃO
+    validator = False
 
     try:
-        validador = path.exists(dir)
+        validator = path.exists(dir)
     except Exception as ex:
         print("ERRO NA FUNÇÃO {} - {]".format(stack()[0][3], ex))
 
-    return validador
+    return validator
 
 
-def get_files_directory(directory, format_types_accepted):
+def get_files_directory(directory: str,
+                        format_types_accepted: Union[tuple, list]) -> list:
 
     """
 
-        FUNÇÃO PARA OBTER OS ARQUIVOS EM UM DETERMINADO DIRETÓRIO
-        FILTRANDO APENAS OS ARQUIVOS DOS FORMATOS ACEITOS POR ESSA API
+    FUNÇÃO PARA OBTER OS ARQUIVOS EM UM DETERMINADO DIRETÓRIO
+    FILTRANDO APENAS OS ARQUIVOS DOS FORMATOS ACEITOS POR ESSA API
 
-        # Arguments
-            directory                    - Required : Caminho/Diretório para obter os arquivos (String)
-            format_types_accepted        - Required : Tipos de arquivos aceitos (List)
+    # Arguments
+        directory                    - Required : Caminho/Diretório para obter os arquivos (String)
+        format_types_accepted        - Required : Tipos de arquivos aceitos (List)
 
-        # Returns
-            list_archives_accepted       - Required : Caminho dos arquivos listados (List)
+    # Returns
+        list_archives_accepted       - Required : Caminho dos arquivos listados (List)
 
     """
 
@@ -83,46 +85,46 @@ def get_files_directory(directory, format_types_accepted):
     return list_archives_accepted
 
 
-def create_path(dir):
+def create_path(dir: str) -> bool:
 
     """
 
-        FUNÇÃO PARA CRIAR UM DIRETÓRIO (PATH).
+    FUNÇÃO PARA CRIAR UM DIRETÓRIO (PATH).
 
-        # Arguments
-            dir                  - Required : Diretório a ser criado (String)
+    # Arguments
+        dir                  - Required : Diretório a ser criado (String)
 
-        # Returns
-            validador            - Required : Validador da função (Boolean)
+    # Returns
+        validator            - Required : validator da função (Boolean)
 
     """
 
-    # INICIANDO O VALIDADOR DA FUNÇÃO
-    validador = False
+    # INICIANDO O validator DA FUNÇÃO
+    validator = False
 
     try:
-       # REALIZANDO A CRIAÇÃO DO DIRETÓRIO
-       makedirs(dir)
+        # REALIZANDO A CRIAÇÃO DO DIRETÓRIO
+        makedirs(dir)
 
-       validador = True
+        validator = True
     except Exception as ex:
         print("ERRO NA FUNÇÃO {} - {]".format(stack()[0][3], ex))
 
-    return validador
+    return validator
 
 
-def converte_int(valor_para_converter):
+def converte_int(valor_para_converter: Union[str, int]) -> int:
 
     """
 
-        FUNÇÃO GENÉRICA PARA CONVERTER UM VALOR PARA FORMATO INTEIRO.
+    FUNÇÃO GENÉRICA PARA CONVERTER UM VALOR PARA FORMATO INTEIRO.
 
 
-        # Arguments
-            valor_para_converter              - Required : Valor para converter (Object)
+    # Arguments
+        valor_para_converter              - Required : Valor para converter (Object)
 
-        # Returns
-            valor_para_converter              - Required : Valor após conversão (Integer)
+    # Returns
+        valor_para_converter              - Required : Valor após conversão (Integer)
 
     """
 
@@ -136,40 +138,57 @@ def converte_int(valor_para_converter):
         return None
 
 
-def lista_bi_to_uni(list_bi):
+def convert_list_bi_to_unidimensional(list_bid: Union[tuple, list]) -> list:
 
     """
 
-        FUNÇÃO QUE PERMITE A CONVERSÃO DE UMA LISTA BIDIMENSIONAL PARA UMA LISTA SIMPLES.
+    FUNÇÃO QUE PERMITE A CONVERSÃO DE UMA LISTA BIDIMENSIONAL PARA UMA LISTA SIMPLES.
 
-        # Arguments
-            list_bi           - Required : Lista Bidimensional. (List)
+    # Arguments
+        list_bid           - Required : Lista Bidimensional. (List)
 
-        # Returns
-            lista_uni         - Required : Lista Unidimensional. (List)
+    # Returns
+        list_uni_result    - Required : Lista Unidimensional. (List)
 
     """
 
-    lista_uni = []
+    list_uni_result = []
 
     try:
-        for operacao in list_bi:
-            lista_uni.append(operacao[0])
+        for list_uni in list_bid:
+            for value in list_uni:
+                list_uni_result.append(value)
 
     except Exception as ex:
-        lista_uni = list_bi
+        print("ERRO NA FUNÇÃO {} - {]".format(stack()[0][3], ex))
+        list_uni_result = list_bid
 
-    return lista_uni
+    return list_uni_result
 
 
-def has_number(value_test):
+def has_number(value_test: str) -> bool:
+
+    """
+
+    FUNÇÃO QUE ANALISA SE HÁ NÚMEROS EM UMA STRING
+
+    # Arguments
+        value_test         - Required : String a ser testada. (String)
+
+    # Returns
+        list_uni_result    - Required : Lista Unidimensional. (List)
+
+    """
 
     # OBTENDO O PATTERN DE APENAS NÚMEROS
-    pattern_number = '[^\d]'
+    pattern_number = "[^\d]"
 
     try:
         # REALIZANDO A VERIFICAÇÃO
-        if len(re.sub(pattern=pattern_number, string=value_test, repl="")) > 0:
+        if len(re.sub(pattern=pattern_number,
+                      string=str(value_test),
+                      repl="")) > 0:
+            # A STRING POSSUI NÚMEROS
             return True
     except Exception as ex:
         print("ERRO NA FUNÇÃO {} - {}".format(stack()[0][3], ex))
@@ -177,25 +196,25 @@ def has_number(value_test):
     return False
 
 
-def get_split_dir(dir):
+def get_split_dir(dir: str) -> [str, str]:
 
     """
 
-        USADO PARA DIVIDIR O NOME DO CAMINHO EM UM PAR DE CABEÇA E CAUDA.
-        AQUI, CAUDA É O ÚLTIMO COMPONENTE DO NOME DO CAMINHO E CABEÇA É TUDO QUE LEVA A ISSO.
+    USADO PARA DIVIDIR O NOME DO CAMINHO EM UM PAR DE CABEÇA E CAUDA.
+    AQUI, CAUDA É O ÚLTIMO COMPONENTE DO NOME DO CAMINHO E CABEÇA É TUDO QUE LEVA A ISSO.
 
-        EX: nome do caminho = '/home/User/Desktop/file.txt'
-        CABEÇA: '/home/User/Desktop'
-        CAUDA: 'file.txt'
+    EX: nome do caminho = '/home/User/Desktop/file.txt'
+    CABEÇA: '/home/User/Desktop'
+    CAUDA: 'file.txt'
 
-        * O DIR PODE SER UMA BASE64
+    * O DIR PODE SER UMA BASE64
 
-        # Arguments
-            dir                 - Required : Caminho a ser splitado (String)
+    # Arguments
+        dir                 - Required : Caminho a ser splitado (String)
 
-        # Returns
-            directory           - Required : Cabeça do diretório (String)
-            filename            - Required : Cauda do diretório (String)
+    # Returns
+        directory           - Required : Cabeça do diretório (String)
+        filename            - Required : Cauda do diretório (String)
 
     """
 
@@ -210,75 +229,76 @@ def get_split_dir(dir):
     return directory, filename
 
 
-def read_csv(data_dir):
+def read_csv(data_dir: str) -> [bool, pd.DataFrame]:
 
     """
 
-        REALIZA LEITURA DA BASE (CSV)
+    REALIZA LEITURA DA BASE (CSV)
 
-        # Arguments
-            data_dir                      - Required : Diretório da base a ser lida (String)
+    # Arguments
+        data_dir                      - Required : Diretório da base a ser lida (String)
 
-        # Returns
-            validador                     - Required : Validação da função (Boolean)
-            dataframe                     - Required : Base lida (DataFrame)
+    # Returns
+        validator                     - Required : Validação da função (Boolean)
+        dataframe                     - Required : Base lida (DataFrame)
 
     """
 
-    # INICIANDO O VALIDADOR
-    validador = False
+    # INICIANDO O validator
+    validator = False
 
     # INICIANDO O DATAFRAME DE RESULTADO DA LEITURA
     dataframe = pd.DataFrame()
 
     try:
-        dataframe = pd.read_csv(data_dir, encoding='utf-8')
+        dataframe = pd.read_csv(data_dir, encoding="utf-8")
 
-        validador = True
+        validator = True
     except Exception as ex:
         print("ERRO NA FUNÇÃO {} - {}".format(stack()[0][3], ex))
 
-    return validador, dataframe
+    return validator, dataframe
 
 
-def save_excel(dataframe_to_save, data_dir):
-
-    """
-
-        REALIZA SAVE DA BASE (CSV)
-
-        # Arguments
-            dataframe_to_save             - Required : Base a ser salva (DataFrame)
-            data_dir                      - Required : Diretório da base a ser salva (String)
-
-        # Returns
-            validador                     - Required : Validação da função (Boolean)
+def save_excel(dataframe_to_save: pd.DataFrame,
+               data_dir: str) -> bool:
 
     """
 
-    # INICIANDO O VALIDADOR
-    validador = False
+    REALIZA SAVE DA BASE (CSV)
+
+    # Arguments
+        dataframe_to_save             - Required : Base a ser salva (DataFrame)
+        data_dir                      - Required : Diretório da base a ser salva (String)
+
+    # Returns
+        validator                     - Required : Validação da função (Boolean)
+
+    """
+
+    # INICIANDO O validator
+    validator = False
 
     try:
         dataframe_to_save.to_excel(data_dir, index=None)
 
-        validador = True
+        validator = True
     except Exception as ex:
         print("ERRO NA FUNÇÃO {} - {}".format(stack()[0][3], ex))
 
-    return validador
+    return validator
 
 
-def get_date_time_now(return_type):
+def get_date_time_now(return_type: str) -> str:
 
     """
 
-        OBTÉM TODOS OS POSSÍVEIS RETORNOS DE DATA E TEMPO.
+    OBTÉM TODOS OS POSSÍVEIS RETORNOS DE DATA E TEMPO.
 
-        # Arguments
-            return_type                    - Required : Formato de retorno. (String)
+    # Arguments
+        return_type                    - Required : Formato de retorno. (String)
 
-        # Returns
+    # Returns
 
     """
 
@@ -302,24 +322,25 @@ def get_date_time_now(return_type):
         return datetime.datetime.now()
 
 
-def order_list_with_arguments(list_values, number_column_order=1, limit=1):
+def order_list_with_arguments(list_values: Union[tuple, list],
+                              number_column_order: int = 1, limit: int = 1) -> list:
 
     """
 
-        FUNÇÃO PARA ORDENAR UMA LISTA E OBTER UM NÚMERO (LIMIT) DE ARGUMENTOS.
+    FUNÇÃO PARA ORDENAR UMA LISTA E OBTER UM NÚMERO (LIMIT) DE ARGUMENTOS.
 
-            1) ORDENA A LISTA USANDO UM DOS SEUS ARGUMENTOS (number_column_order)
-            2) FILTRA A LISTA DE ACORDO COM UM NÚMERO DESEJADO DE ELEMENTOS (limit)
+        1) ORDENA A LISTA USANDO UM DOS SEUS ARGUMENTOS (number_column_order)
+        2) FILTRA A LISTA DE ACORDO COM UM NÚMERO DESEJADO DE ELEMENTOS (limit)
 
-        # Arguments
-            list_values                  - Required : Lista de valores para processar (List)
-            number_column_order          - Optional : Qual o argumento deve ser usado
-                                                      como parâmetro de ordenação (Integer)
-            limit                        - Optional : Número desejado de argumentos
-                                                      para retorno da função (Integer)
+    # Arguments
+        list_values                  - Required : Lista de valores para processar (List)
+        number_column_order          - Optional : Qual o argumento deve ser usado
+                                                  como parâmetro de ordenação (Integer)
+        limit                        - Optional : Número desejado de argumentos
+                                                  para retorno da função (Integer)
 
-        # Returns
-            return_list                 - Required : Lista resultado (List)
+    # Returns
+        return_list                 - Required : Lista resultado (List)
 
     """
 
@@ -342,7 +363,9 @@ def order_list_with_arguments(list_values, number_column_order=1, limit=1):
 
     # ORDENANDO POR UM DOS VALORES DE ARGUMENTOS DA LISTA
     # FILTRANDO DE ACORDO COM O LIMITE DESEJADO
-    list_result_filter = sorted(list_values, key=lambda row: (row[number_column_order]), reverse=True)[:limit]
+    list_result_filter = sorted(
+        list_values, key=lambda row: (row[number_column_order]), reverse=True
+    )[:limit]
 
     # PERCORRENDO A LISTA DE RESULTADOS, PARA FILTAR NA LISTA ORIGINAL
     # O OBJETIVO É MANTER NA LISTA ORIGINAL (MANTENDO A ORDEM DELA)
@@ -356,53 +379,55 @@ def order_list_with_arguments(list_values, number_column_order=1, limit=1):
     return return_list
 
 
-def remove_line_with_black_list_words(text, list_words=[], mode="FIND"):
+def remove_line_with_black_list_words(text: str,
+                                      list_words: list = [],
+                                      mode: str = "FIND") -> str:
 
     """
 
-        FUNÇÃO PARA REMOVER LINHAS QUE CONTÉM PALAVRAS NÃO DESEJADAS
+    FUNÇÃO PARA REMOVER LINHAS QUE CONTÉM PALAVRAS NÃO DESEJADAS
 
-        HÁ DOIS MODOS DE BUSCA:
-            EQUAL - A PALAVRA ESTÁ EXATAMENTE IGUAL
-            FIND - A PALAVRA ESTÁ PARCIALMENTE IGUAL
+    HÁ DOIS MODOS DE BUSCA:
+        EQUAL - A PALAVRA ESTÁ EXATAMENTE IGUAL
+        FIND - A PALAVRA ESTÁ PARCIALMENTE IGUAL
 
-        # Arguments
-            text                  - Required : Texto a ser analisado (String)
-            list_words            - Optional : Lista de palavras a serem buscadas (List)
-            mode                  - Optional : Modo de busca da palavra (String)
+    # Arguments
+        text                  - Required : Texto a ser analisado (String)
+        list_words            - Optional : Lista de palavras a serem buscadas (List)
+        mode                  - Optional : Modo de busca da palavra (String)
 
-        # Returns
-            return_text          - Required : Texto resultante após a análise (String)
+    # Returns
+        return_text          - Required : Texto resultante após a análise (String)
 
     """
 
-    # INICIANDO O VALIDADOR
-    validador = False
+    # INICIANDO O validator
+    validator = False
 
     return_text = ""
 
     for line in text.split("\n"):
 
-        validador = False
+        validator = False
 
         # PERCORRENDO TODAS AS PALAVRAS DA BLACK LIST
         for value in list_words:
 
             if mode == "FIND":
 
-                if line.find(value)!=-1:
+                if line.find(value) != -1:
                     # A PALAVRA FOI ENCONTRADA
-                    validador = True
+                    validator = True
                     break
 
             else:
 
                 if value in line.split(" "):
                     # A PALAVRA FOI ENCONTRADA
-                    validador = True
+                    validator = True
                     break
 
-        if validador is False:
+        if validator is False:
             # A PALAVRA NÃO FOI ENCONTRADA
             return_text = return_text + "\n" + line
 
@@ -410,27 +435,28 @@ def remove_line_with_black_list_words(text, list_words=[], mode="FIND"):
     return return_text
 
 
-def verify_find_intersection(data_verified, data_lists):
+def verify_find_intersection(data_verified: str,
+                             data_lists: list) -> bool:
 
     """
 
-        FUNÇÃO PARA VERIFICAR SE UM DADO (DATA_VERIFIED) ESTÁ CONTIDO
-        EM QUALQUER ELEMENTO DE UMA LISTA DE DADOS.
+    FUNÇÃO PARA VERIFICAR SE UM DADO (DATA_VERIFIED) ESTÁ CONTIDO
+    EM QUALQUER ELEMENTO DE UMA LISTA DE DADOS.
 
-        ESSA VERIFICAÇÃO É REALIZADA UTILIZANDO PARTE DA STRING,
-        NESSE CASO, UTILIZA-SE O MÉTODO 'FIND'.
+    ESSA VERIFICAÇÃO É REALIZADA UTILIZANDO PARTE DA STRING,
+    NESSE CASO, UTILIZA-SE O MÉTODO 'FIND'.
 
-        # Arguments
-            data_verified               - Required : Dado a ser verificado (String)
-            data_lists                  - Required : Lista de dados (List)
+    # Arguments
+        data_verified               - Required : Dado a ser verificado (String)
+        data_lists                  - Required : Lista de dados (List)
 
-        # Returns
-            validador                   - Required : Validador da função (String)
+    # Returns
+        validator                   - Required : validator da função (String)
 
     """
 
-    # INICIANDO O VALIDADOR DA FUNÇÃO
-    validador = False
+    # INICIANDO O validator DA FUNÇÃO
+    validator = False
 
     try:
         # PERCORRENDO TODOS OS DADOS DA LISTA DE DADOS
@@ -440,26 +466,26 @@ def verify_find_intersection(data_verified, data_lists):
             # ESSA VERIFICAÇÃO É REALIZADA UTILIZANDO PARTE DA STRING
             # NESSE CASO, UTILIZA-SE O MÉTODO 'FIND'
             if data_verified.find(value) != -1 and data_verified != "":
-                validador = True
+                validator = True
                 break
 
     except Exception as ex:
         print("ERRO NA FUNÇÃO {} - {}".format(stack()[0][3], ex))
 
-    return validador
+    return validator
 
 
-def convert_text_unidecode(text):
+def convert_text_unidecode(text: str) -> str:
 
     """
 
-        TRANSFORMA O TEXTO PURO EM FORMATO UNIDECODE (SEM ACENTOS).
+    TRANSFORMA O TEXTO PURO EM FORMATO UNIDECODE (SEM ACENTOS).
 
-        # Arguments
-            text                    - Required : Texto a ser convertido. (String)
+    # Arguments
+        text                    - Required : Texto a ser convertido. (String)
 
-        # Returns
-            text_unidecode          - Required : Texto após conversão. (String)
+    # Returns
+        text_unidecode          - Required : Texto após conversão. (String)
 
     """
 

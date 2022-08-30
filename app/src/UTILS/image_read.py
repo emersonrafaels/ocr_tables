@@ -23,12 +23,12 @@ def read_image_gray(image_path):
 
     """
 
-        FUNÇÃO PARA LEITURA DE UMA IMAGEM.
+    FUNÇÃO PARA LEITURA DE UMA IMAGEM.
 
-        # Arguments
-            caminho_imagem       - Required : Caminho da imagem a ser lida (String)
-        # Returns
-            img                  - Required : Imagem após leitura (Array)
+    # Arguments
+        caminho_imagem       - Required : Caminho da imagem a ser lida (String)
+    # Returns
+        img                  - Required : Imagem após leitura (Array)
 
     """
 
@@ -49,12 +49,12 @@ def read_image_rgb(image_path):
 
     """
 
-        FUNÇÃO PARA LEITURA DE UMA IMAGEM.
+    FUNÇÃO PARA LEITURA DE UMA IMAGEM.
 
-        # Arguments
-            caminho_imagem       - Required : Caminho da imagem a ser lida (String)
-        # Returns
-            img                  - Required : Imagem após leitura (Array)
+    # Arguments
+        caminho_imagem       - Required : Caminho da imagem a ser lida (String)
+    # Returns
+        img                  - Required : Imagem após leitura (Array)
 
     """
 
@@ -75,12 +75,12 @@ def realiza_leitura_imagem(caminho_imagem):
 
     """
 
-        FUNÇÃO PARA LEITURA DE UMA IMAGEM.
+    FUNÇÃO PARA LEITURA DE UMA IMAGEM.
 
-        # Arguments
-            caminho_imagem       - Required : Caminho da imagem a ser lida (String)
-        # Returns
-            img                  - Required : Imagem após leitura (Object)
+    # Arguments
+        caminho_imagem       - Required : Caminho da imagem a ser lida (String)
+    # Returns
+        img                  - Required : Imagem após leitura (Object)
 
     """
 
@@ -101,13 +101,13 @@ def realiza_leitura_imagem_pillow(caminho_imagem):
 
     """
 
-        FUNÇÃO PARA LEITURA DE UMA IMAGEM.
-        UTILIZA PIL - IMAGE
+    FUNÇÃO PARA LEITURA DE UMA IMAGEM.
+    UTILIZA PIL - IMAGE
 
-        # Arguments
-            caminho_imagem       - Required : Caminho da imagem a ser lida (String)
-        # Returns
-            img                  - Required : Imagem após leitura (Object)
+    # Arguments
+        caminho_imagem       - Required : Caminho da imagem a ser lida (String)
+    # Returns
+        img                  - Required : Imagem após leitura (Object)
 
     """
 

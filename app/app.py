@@ -24,21 +24,23 @@ from os import path
 from pathlib import Path
 
 from dynaconf import settings
+from pydantic import validate_arguments
 
 try:
-    from src.CONFIG import config
-    from execute_extract_table import Extract_Table
-    from execute_ocr import Execute_OCR
-    import execute_log
+    from app.src.CONFIG import config
+    from app.execute_extract_table import Extract_Table
+    from app.execute_ocr import Execute_OCR
+    from app import execute_log
 except ModuleNotFoundError:
     sys.path.append(path.join(str(Path(__file__).resolve().parent.parent), "app"))
-    from src.CONFIG import config
-    from execute_extract_table import Extract_Table
-    from execute_ocr import Execute_OCR
-    import execute_log
+    from app.src.CONFIG import config
+    from app.execute_extract_table import Extract_Table
+    from app.execute_ocr import Execute_OCR
+    from app import execute_log
 
 
-def orchestra_extract_table_ocr(files):
+@validate_arguments
+def orchestra_extract_table_ocr(files: bytes = None):
 
     # INICIANDO OS LOGS DO SISTEMA
     execute_log.startLog()
@@ -47,17 +49,18 @@ def orchestra_extract_table_ocr(files):
     result_ocr = ""
     json_result = {}
 
-    # VALIDANDO SE DEVE HAVER EXTRAÇÃO DAS TABELAS
-    if settings.VALIDATOR_EXTRACT_TABLE:
+    if files is not None:
 
-        # EXECUTANDO A PIPELINE PARA BUSCA E EXTRAÇÃO DAS TABELAS
-        results = Extract_Table().main_extract_table(files)
+        # VALIDANDO SE DEVE HAVER EXTRAÇÃO DAS TABELAS
+        if settings.VALIDATOR_EXTRACT_TABLE:
 
-    # EXECUTANDO O OCR
-    result_ocr, json_result = Execute_OCR().execute_pipeline_ocr(results)
+            # EXECUTANDO A PIPELINE PARA BUSCA E EXTRAÇÃO DAS TABELAS
+            results = Extract_Table().main_extract_table(files)
 
-    print("RESULTADO OBTIDO:\n{}".format(result_ocr))
-    print("JSON_RESULT:\n{}".format(json_result))
+        # EXECUTANDO O OCR
+        result_ocr, json_result = Execute_OCR().execute_pipeline_ocr(results)
 
+        print("RESULTADO OBTIDO:\n{}".format(result_ocr))
+        print("JSON_RESULT:\n{}".format(json_result))
 
     return result_ocr, json_result

@@ -34,26 +34,26 @@ from dynaconf import settings
 from app.src.UTILS.generic_functions import create_path, verify_exists
 
 
-def configure_logging(dir_save_logs):
+def configure_logging(dir_save_logs: str) -> bool:
 
     """
 
-        CONFIGURANDO OS LOGS (LOGGING).
+    CONFIGURANDO OS LOGS (LOGGING).
 
-        DOIS LOGS SERÃO CONFIGURADOS:
-            - MANIPULADORES DE LOGS - ARQUIVO DE LOG
-            - MANIPULADORES DE LOGS - CONSOLE (TELA DO USUÁRIO)
+    DOIS LOGS SERÃO CONFIGURADOS:
+        - MANIPULADORES DE LOGS - ARQUIVO DE LOG
+        - MANIPULADORES DE LOGS - CONSOLE (TELA DO USUÁRIO)
 
-        # Arguments
-            dir_save_logs       - Required : Diretório para save dos logs (DirectoryPath)
+    # Arguments
+        dir_save_logs       - Required : Diretório para save dos logs (DirectoryPath)
 
-        # Returns
-            validador            - Required : Validador da função (Boolean)
+    # Returns
+        validator            - Required : validator da função (Boolean)
 
     """
 
-    # INICIANDO O VALIDADOR DA FUNÇÃO
-    validador = False
+    # INICIANDO O validator DA FUNÇÃO
+    validator = False
 
     # CONFIGURAÇÕES DE LOG
     try:
@@ -80,8 +80,12 @@ def configure_logging(dir_save_logs):
                 ch.setLevel(settings.LOGLEVEL_CONSOLE)
 
                 # CRIANDO OS FORMATOS DE LOGS
-                formatter_f = logging.Formatter('%(levelname)s - %(asctime)s - %(name)s - %(message)s')
-                formatter_c = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+                formatter_f = logging.Formatter(
+                    "%(levelname)s - %(asctime)s - %(name)s - %(message)s"
+                )
+                formatter_c = logging.Formatter(
+                    "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+                )
 
                 # ATRIBUINDO OS FORMATOS DE LOGS PARA CADA UM DOS HANDLERS
                 fh.setFormatter(formatter_f)
@@ -93,67 +97,70 @@ def configure_logging(dir_save_logs):
 
             settings.LOGGERS[settings.APPNAME] = logger
 
-            validador = True
+            validator = True
 
     except Exception as ex:
         print("ERRO NA FUNÇÃO {} - {]".format(stack()[0][3], ex))
 
-    return validador
+    return validator
 
 
-def startLog():
-
-    """
-
-        CONFIGURANDO OS LOGS (LOGGING).
-
-        DOIS LOGS SERÃO CONFIGURADOS:
-            - MANIPULADORES DE LOGS - ARQUIVO DE LOG
-            - MANIPULADORES DE LOGS - CONSOLE (TELA DO USUÁRIO)
-
-        # Arguments
-
-        # Returns
-            validador            - Required : Validador da função (Boolean)
+def startLog() -> bool:
 
     """
 
-    # INICIANDO O VALIDADOR DA FUNÇÃO
-    validador = False
+    CONFIGURANDO OS LOGS (LOGGING).
+
+    DOIS LOGS SERÃO CONFIGURADOS:
+        - MANIPULADORES DE LOGS - ARQUIVO DE LOG
+        - MANIPULADORES DE LOGS - CONSOLE (TELA DO USUÁRIO)
+
+    # Arguments
+
+    # Returns
+        validator            - Required : validator da função (Boolean)
+
+    """
+
+    # INICIANDO O validator DA FUNÇÃO
+    validator = False
 
     # OBTENDO O DIR SAVE LOGS
     dir_save_logs = path.join(Path(__file__).resolve().parent, settings.DIR_SAVE_LOGS)
 
     # VERIFICANDO SE O DIRETÓRIO DE SAVE DOS LOGS EXISTE
-    validador = verify_exists(dir_save_logs)
+    validator = verify_exists(dir_save_logs)
 
-    if validador is False:
+    if validator is False:
 
         # CRIANDO O DIRETÓRIO DE SAVE DOS LOGS
-        validador = create_path(dir_save_logs)
+        validator = create_path(dir_save_logs)
 
-    if validador:
+    if validator:
 
         # CONFIGURANDO O USO DA LOGGING (REGISTRANDO NO ARQUIVO DE LOG E NO CONSOLE)
-        validador = configure_logging(dir_save_logs=dir_save_logs)
+        validator = configure_logging(dir_save_logs=dir_save_logs)
 
-    return validador
+    return validator
 
 
-def on_log(msg, origin=None, image=None, idt=None):
+def on_log(msg: str = "",
+           origin: str = None,
+           image: str = None,
+           idt: str = None):
 
     """
 
-        REALIZANDO O REGISTRO DE INÍCIO DOS LOGS
+    REALIZANDO O REGISTRO DE INÍCIO DOS LOGS
 
-        # Arguments
-            msg                  - Required : Mensagem do log (String)
-            origin               - Optional : Origem dos logs (String)
-            image                - Optional : Image atual (String)
-            idt                  - Optional : Identificação da chamada (String)
+    # Arguments
+        msg                  - Required : Mensagem do log (String)
+        origin               - Optional : Origem dos logs (String)
+        image                - Optional : Image atual (String)
+        idt                  - Optional : Identificação da chamada (String)
 
-        # Returns
-            validador            - Required : Validador da função (Boolean)
+    # Returns
+        validator            - Required : validator da função (Boolean)
 
     """
 
@@ -168,22 +175,25 @@ def on_log(msg, origin=None, image=None, idt=None):
         print("ERRO NA FUNÇÃO {} - {]".format(stack()[0][3], ex))
 
 
-
-def start(msg, origin=None, image=None, idt=None, start_time=None):
+def start(msg: str = "",
+          origin: str = None,
+          image: str = None,
+          idt: str = None,
+          start_time: str = None):
 
     """
 
-        REALIZANDO REGISTRO DE START
+    REALIZANDO REGISTRO DE START
 
-        # Arguments
-            msg                  - Required : Mensagem do log (String)
-            origin               - Optional : Origem dos logs (String)
-            image                - Optional : Image atual (String)
-            idt                  - Optional : Identificação da chamada (String)
-            start_time           - Optional : Tempo de início do processamento (Float)
+    # Arguments
+        msg                  - Required : Mensagem do log (String)
+        origin               - Optional : Origem dos logs (String)
+        image                - Optional : Image atual (String)
+        idt                  - Optional : Identificação da chamada (String)
+        start_time           - Optional : Tempo de início do processamento (Float)
 
-        # Returns
-            validador            - Required : Validador da função (Boolean)
+    # Returns
+        validator            - Required : validator da função (Boolean)
 
     """
 
@@ -198,21 +208,25 @@ def start(msg, origin=None, image=None, idt=None, start_time=None):
         print("ERRO NA FUNÇÃO {} - {]".format(stack()[0][3], ex))
 
 
-def end(msg, origin=None, image=None, idt=None, end_time=None):
+def end(msg: str = "",
+        origin: str = None,
+        image: str = None,
+        idt: str = None,
+        end_time: str = None):
 
     """
 
-        REALIZANDO REGISTRO DE ERRO
+    REALIZANDO REGISTRO DE ERRO
 
-        # Arguments
-            msg                  - Required : Mensagem do log (String)
-            origin               - Optional : Origem dos logs (String)
-            image                - Optional : Image atual (String)
-            idt                  - Optional : Identificação da chamada (String)
-            end_time             - Optional : Tempo de final do processamento (Float)
+    # Arguments
+        msg                  - Required : Mensagem do log (String)
+        origin               - Optional : Origem dos logs (String)
+        image                - Optional : Image atual (String)
+        idt                  - Optional : Identificação da chamada (String)
+        end_time             - Optional : Tempo de final do processamento (Float)
 
-        # Returns
-            validador            - Required : Validador da função (Boolean)
+    # Returns
+        validator            - Required : validator da função (Boolean)
 
     """
 
@@ -227,20 +241,23 @@ def end(msg, origin=None, image=None, idt=None, end_time=None):
         print("ERRO NA FUNÇÃO {} - {]".format(stack()[0][3], ex))
 
 
-def error(msg, origin=None, image=None, idt=None):
+def error(msg: str = "",
+           origin: str = None,
+           image: str = None,
+           idt: str = None):
 
     """
 
-        REALIZANDO REGISTRO DE ERRO
+    REALIZANDO REGISTRO DE ERRO
 
-        # Arguments
-            msg                  - Required : Mensagem do log (String)
-            origin               - Optional : Origem dos logs (String)
-            image                - Optional : Image atual (String)
-            idt                  - Optional : Identificação da chamada (String)
+    # Arguments
+        msg                  - Required : Mensagem do log (String)
+        origin               - Optional : Origem dos logs (String)
+        image                - Optional : Image atual (String)
+        idt                  - Optional : Identificação da chamada (String)
 
-        # Returns
-            validador            - Required : Validador da função (Boolean)
+    # Returns
+        validator            - Required : validator da função (Boolean)
 
     """
 
@@ -255,20 +272,23 @@ def error(msg, origin=None, image=None, idt=None):
         print("ERRO NA FUNÇÃO {} - {]".format(stack()[0][3], ex))
 
 
-def warnings(msg, origin=None, image=None, idt=None):
+def warnings(msg: str = "",
+           origin: str = None,
+           image: str = None,
+           idt: str = None):
 
     """
 
-        REALIZANDO O REGISTRO DE WARNINGS
+    REALIZANDO O REGISTRO DE WARNINGS
 
-        # Arguments
-            msg                  - Required : Mensagem do log (String)
-            origin               - Optional : Origem dos logs (String)
-            image                - Optional : Image atual (String)
-            idt                  - Optional : Identificação da chamada (String)
+    # Arguments
+        msg                  - Required : Mensagem do log (String)
+        origin               - Optional : Origem dos logs (String)
+        image                - Optional : Image atual (String)
+        idt                  - Optional : Identificação da chamada (String)
 
-        # Returns
-            validador            - Required : Validador da função (Boolean)
+    # Returns
+        validator            - Required : validator da função (Boolean)
 
     """
 
@@ -283,20 +303,23 @@ def warnings(msg, origin=None, image=None, idt=None):
         print("ERRO NA FUNÇÃO {} - {]".format(stack()[0][3], ex))
 
 
-def info(msg, origin=None, image=None, idt=None):
+def info(msg: str = "",
+           origin: str = None,
+           image: str = None,
+           idt: str = None):
 
     """
 
-        REALIZANDO REGISTRO DE INFORMAÇÕES
+    REALIZANDO REGISTRO DE INFORMAÇÕES
 
-        # Arguments
-            msg                  - Required : Mensagem do log (String)
-            origin               - Optional : Origem dos logs (String)
-            image                - Optional : Image atual (String)
-            idt                  - Optional : Identificação da chamada (String)
+    # Arguments
+        msg                  - Required : Mensagem do log (String)
+        origin               - Optional : Origem dos logs (String)
+        image                - Optional : Image atual (String)
+        idt                  - Optional : Identificação da chamada (String)
 
-        # Returns
-            validador            - Required : Validador da função (Boolean)
+    # Returns
+        validator            - Required : validator da função (Boolean)
 
     """
 

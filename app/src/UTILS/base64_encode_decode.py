@@ -27,22 +27,22 @@ import magic
 from app import execute_log
 
 
-def base64_get_extension(file_base64_decode):
+def base64_get_extension(file_base64_decode: bytes) -> str:
 
     """
 
-         ESSA FUNÇÃO RETORNA O TIPO DA IMAGEM DECODIFICADA DO BASE64.
+     ESSA FUNÇÃO RETORNA O TIPO DA IMAGEM DECODIFICADA DO BASE64.
 
-         PARA OBTER A EXTENSÃO UTILIZA-SE O MIMETYPE:
-            Adivinha a extensão de um arquivo com base em seu tipo MIME, fornecido por tipo .
-            O valor de retorno é uma string que fornece uma
-            extensão de nome de arquivo, incluindo o ponto inicial ( '.')
+     PARA OBTER A EXTENSÃO UTILIZA-SE O MIMETYPE:
+        Adivinha a extensão de um arquivo com base em seu tipo MIME, fornecido por tipo .
+        O valor de retorno é uma string que fornece uma
+        extensão de nome de arquivo, incluindo o ponto inicial ( '.')
 
-         # Arguments
-            file_base64_decode          - Required : Input no formato Base64 Decodificado (Stromg)
+     # Arguments
+        file_base64_decode          - Required : Input no formato Base64 Decodificado (Stromg)
 
-        # Returns
-            extension                  - Required : Extensão da imagem decodificada (String)
+    # Returns
+        extension                  - Required : Extensão da imagem decodificada (String)
 
     """
 
@@ -59,21 +59,21 @@ def base64_get_extension(file_base64_decode):
     return extension
 
 
-def isbase64(input_file):
+def isbase64(input_file: bytes) -> bool:
 
     """
 
-         VERIFICA SE UM VALOR É UMA BASE64.
+     VERIFICA SE UM VALOR É UMA BASE64.
 
-         FUNCIONA PARA VALORES EM FORMATO:
-            1) BYTES
-            2) STRING
+     FUNCIONA PARA VALORES EM FORMATO:
+        1) BYTES
+        2) STRING
 
-         # Arguments
-            input_file                 - Required : Valor a ser verificado (Bytes | String)
+     # Arguments
+        input_file                 - Required : Valor a ser verificado (Bytes | String)
 
-        # Returns
-            verificator                - Required : Verificador de base64 (Boolean)
+    # Returns
+        verificator                - Required : Verificador de base64 (Boolean)
 
     """
 
@@ -82,7 +82,7 @@ def isbase64(input_file):
         if isinstance(input_file, str):
 
             # CONVERTENDO A STRING EM BYTES
-            input_file_bytes = bytes(input_file, 'ascii')
+            input_file_bytes = bytes(input_file, "ascii")
 
         # VERIFICANDO SE O ENVIADO ESTÁ EM FORMATO DE BYTES
         elif isinstance(input_file, bytes):
@@ -93,25 +93,28 @@ def isbase64(input_file):
         else:
             raise ValueError("Argument must be string or bytes")
 
-        return base64.b64encode(base64.b64decode(input_file_bytes)) == input_file_bytes, input_file_bytes
+        return (
+            base64.b64encode(base64.b64decode(input_file_bytes)) == input_file_bytes,
+            input_file_bytes,
+        )
 
     except Exception:
         return False, None
 
 
-def base64_to_image(file_base64):
+def base64_to_image(file_base64: bytes) -> str:
 
     """
 
-         ESSA FUNÇÃO TEM COMO OBJETIVO, CONVERTER FORMATO DE INPUT (BASE64) -> IMAGE (PNG)
+     ESSA FUNÇÃO TEM COMO OBJETIVO, CONVERTER FORMATO DE INPUT (BASE64) -> IMAGE (PNG)
 
-         O ARQUIVO OBTIDO (PNG) É SALVO NA MÁQUINA QUE ESTÁ EXECUTANDO O MODELO.
+     O ARQUIVO OBTIDO (PNG) É SALVO NA MÁQUINA QUE ESTÁ EXECUTANDO O MODELO.
 
-         # Arguments
-            file_base64                - Required : Input no formato Base64 (BASE64)
+     # Arguments
+        file_base64                - Required : Input no formato Base64 (BASE64)
 
-        # Returns
-            built_image                - Required : Caminho/Nome do arquivo gerado (String)
+    # Returns
+        built_image                - Required : Caminho/Nome do arquivo gerado (String)
 
     """
 
@@ -150,20 +153,20 @@ def base64_to_image(file_base64):
     return built_image
 
 
-def image_to_base64(file_image):
+def image_to_base64(file_image: str) -> bytes:
 
     """
 
-         ESSA FUNÇÃO TEM COMO OBJETIVO, CONVERTER FORMATO DE INPUT (PNG) -> BASE64
+     ESSA FUNÇÃO TEM COMO OBJETIVO, CONVERTER FORMATO DE INPUT (PNG) -> BASE64
 
-         O ARQUIVO OBTIDO (PNG) É SALVO NA MÁQUINA QUE ESTÁ EXECUTANDO O MODELO.
+     O ARQUIVO OBTIDO (PNG) É SALVO NA MÁQUINA QUE ESTÁ EXECUTANDO O MODELO.
 
-         # Arguments
-            file_image                - Required : Caminho do arquivo
-                                                   no formato imagem (String)
+     # Arguments
+        file_image                - Required : Caminho do arquivo
+                                               no formato imagem (String)
 
-        # Returns
-            built_base64              - Required : Valor no formato Base64 (BASE64)
+    # Returns
+        built_base64              - Required : Valor no formato Base64 (BASE64)
 
     """
 
@@ -173,7 +176,7 @@ def image_to_base64(file_image):
     try:
         # DECODOFICANDO A BASE64, ARMAZENANDO-O NO OBJETO ABERTO
         # ESCREVENDO NA MÁQUINA
-        built_base64 = base64.b64encode(open(file_image, 'rb').read())
+        built_base64 = base64.b64encode(open(file_image, "rb").read())
 
     except Exception as ex:
         execute_log.error("ERRO NA FUNÇÃO {} - {}".format(stack()[0][3], ex))

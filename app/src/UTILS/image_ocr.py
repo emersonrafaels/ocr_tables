@@ -28,38 +28,39 @@ from src.UTILS.image_view import image_view_functions
 from src.UTILS.image_convert_format import orchestra_read_image
 
 
-class ocr_functions():
+class ocr_functions:
 
     """
 
-        FUNÇÕES PARA REALIZAÇÃO DE OCR DE UMA IMAGEM.
-        O OCR PERMITIRÁ TRANSCREVER A IMAGEM.
-        CONVERSÃO IMAGEM PARA TEXTO.
+    FUNÇÕES PARA REALIZAÇÃO DE OCR DE UMA IMAGEM.
+    O OCR PERMITIRÁ TRANSCREVER A IMAGEM.
+    CONVERSÃO IMAGEM PARA TEXTO.
 
-        # Arguments
-            imagem_atual                          - Required : Imagem para aplicação do OCR (String | Object)
-            lang_padrao                           - Optional : Linguagem que será utilizada no OCR (String)
-            config_tesseract_psm                  - Optional : Configuração do tesseract.
-                                                               É possível passar um valor
-                                                               específico de PSM. (String | Integer)
-            config_tesseract_oem                  - Optional : Configuração do tesseract.
-                                                               É possível passar um valor
-                                                               específico de OEM. (String | Integer)
-            tipo_retorno_ocr_input                - Optional : Tipo de retorno do ocr desejado (String)
-            tipo_output_type_image_data           - Optional : Tipo de formato do output do ocr completo (String)
-        # Returns
-            texto_ocr                             - Required : Texto obtido após aplicação da técnica de OCR (String)
+    # Arguments
+        imagem_atual                          - Required : Imagem para aplicação do OCR (String | Object)
+        lang_padrao                           - Optional : Linguagem que será utilizada no OCR (String)
+        config_tesseract_psm                  - Optional : Configuração do tesseract.
+                                                           É possível passar um valor
+                                                           específico de PSM. (String | Integer)
+        config_tesseract_oem                  - Optional : Configuração do tesseract.
+                                                           É possível passar um valor
+                                                           específico de OEM. (String | Integer)
+        tipo_retorno_ocr_input                - Optional : Tipo de retorno do ocr desejado (String)
+        tipo_output_type_image_data           - Optional : Tipo de formato do output do ocr completo (String)
+    # Returns
+        texto_ocr                             - Required : Texto obtido após aplicação da técnica de OCR (String)
 
     """
 
-    def __init__(self,
-                 lang_padrao=settings.TESSERACT_LANG,
-                 config_tesseract_psm=settings.TESSERACT_PSM,
-                 config_tesseract_oem=settings.TESSERACT_OEM,
-                 type_return_ocr_input=settings.TIPO_OCR,
-                 visualiza_ocr_completo=settings.VISUALIZA_OCR_COMPLETO,
-                 type_output_image_data=settings.OUTPUT_TYPE_IMAGE_DATA):
-
+    def __init__(
+        self,
+        lang_padrao=settings.TESSERACT_LANG,
+        config_tesseract_psm=settings.TESSERACT_PSM,
+        config_tesseract_oem=settings.TESSERACT_OEM,
+        type_return_ocr_input=settings.TIPO_OCR,
+        visualiza_ocr_completo=settings.VISUALIZA_OCR_COMPLETO,
+        type_output_image_data=settings.OUTPUT_TYPE_IMAGE_DATA,
+    ):
 
         # 1 - LINGUAGEM PADRÃO DO OCR
         self.lang_padrao = lang_padrao
@@ -80,70 +81,67 @@ class ocr_functions():
         # 6 - TIPO DE FORMATO DO OUTPUT QUANDO UTILIZADO OCR COMPLETO
         self.OUTPUT_TYPE_IMAGE_DATA = str(type_output_image_data).upper()
 
-
     @staticmethod
     def converte_bgr_rgb(imagem_para_conversao_rgb):
 
         """
 
-            CONVERTE UMA IMAGEM DE FORMATO BGR PARA RGB.
-            PARA A CONVERSÃO, UTILIZA OPENCV - CVTCOLOR (ARGS: cv2.COLOR_BGR2RGB)
+        CONVERTE UMA IMAGEM DE FORMATO BGR PARA RGB.
+        PARA A CONVERSÃO, UTILIZA OPENCV - CVTCOLOR (ARGS: cv2.COLOR_BGR2RGB)
 
-            # Arguments
-                imagem_para_conversao_rgb        - Required : Imagem para aplicação da conversão (Object)
-            # Returns
-                validador                        - Required : Validador de execução da função (Boolean)
-                rgb                              - Required : Imagem após conversãO RGB (Object)
+        # Arguments
+            imagem_para_conversao_rgb        - Required : Imagem para aplicação da conversão (Object)
+        # Returns
+            validator                        - Required : validator de execução da função (Boolean)
+            rgb                              - Required : Imagem após conversãO RGB (Object)
 
         """
 
-        # INICIANDO O VALIDADOR
-        validador = False
+        # INICIANDO O validator
+        validator = False
 
         try:
             rgb = cv2.cvtColor(imagem_para_conversao_rgb, cv2.COLOR_BGR2RGB)
 
-            validador = True
+            validator = True
 
-            return validador, rgb
+            return validator, rgb
 
         except Exception as ex:
             print("ERRO NA FUNÇÃO: {} - {}".format(stack()[0][3], ex))
-            return validador, imagem_para_conversao_rgb
-
+            return validator, imagem_para_conversao_rgb
 
     def tesseract_lang_disponiveis(self):
 
         """
 
-            OBTÉM A LISTA DE LINGUAGENS DISPONÍVEIS.
-            UTILIZA TESSERACT - GET LANGUAGES
+        OBTÉM A LISTA DE LINGUAGENS DISPONÍVEIS.
+        UTILIZA TESSERACT - GET LANGUAGES
 
-            # Arguments
+        # Arguments
 
-            # Returns
-                validador                        - Required : Validador de execução da função (Boolean)
-                lista_linguagens_tesseract       - Required : Lista de lang disponíveis (List)
+        # Returns
+            validator                        - Required : validator de execução da função (Boolean)
+            lista_linguagens_tesseract       - Required : Lista de lang disponíveis (List)
 
         """
 
-        # INICIANDO O VALIDADOR
-        validador = False
+        # INICIANDO O validator
+        validator = False
 
         # INICIANDO A VARIÁVEL DE LINGUAGENS DISPONÍVEIS
         lista_linguagens_tesseract = []
 
         try:
-            lista_linguagens_tesseract = pytesseract.get_languages(config='')
+            lista_linguagens_tesseract = pytesseract.get_languages(config="")
 
-            validador = True
+            validator = True
 
         except Exception as ex:
             print("A LINGUAGEM SELECIONADA NÃO ESTÁ DISPONÍVEL")
             print("ERRO NA FUNÇÃO: {} - {}".format(stack()[0][3], ex))
 
         return lista_linguagens_tesseract
-
 
     @staticmethod
     def obtem_tesseract_psm_oem(valor_config_psm, valor_config_oem):
@@ -175,45 +173,47 @@ class ocr_functions():
             3 Padrão, o que estiver disponível
         """
 
-        # INICIANDO O VALIDADOR
-        validador = False
+        # INICIANDO O validator
+        validator = False
 
         # INICIANDO A VARIÁVEL DE CONFIG PSM
-        valor_psm_oem_tesseract = 'tessdata'
+        valor_psm_oem_tesseract = "tessdata"
 
         # CONVERTENDO OS VALORES PARA INT
 
         try:
             # VERIFICANDO SE O VALOR DE PSM E OEM ENCONTRA-SE DENTRE AS CONFIGS
-            if converte_int(valor_config_psm) in range(14) and converte_int(valor_config_oem) in range(4):
+            if converte_int(valor_config_psm) in range(14) and converte_int(
+                valor_config_oem
+            ) in range(4):
 
                 # CONVERTENDO O VALOR DO ARGUMENTO (INT) PARA
                 # FORMA ESPERADA PELO TESSERACT
 
-                valor_psm_oem_tesseract = 'tessdata --psm {} --oem {}'.format(str(valor_config_psm),
-                                                                              str(valor_config_oem))
+                valor_psm_oem_tesseract = "tessdata --psm {} --oem {}".format(
+                    str(valor_config_psm), str(valor_config_oem)
+                )
 
-                validador = True
+                validator = True
 
         except Exception as ex:
             print("ERRO NA FUNÇÃO: {} - {}".format(stack()[0][3], ex))
 
         return valor_psm_oem_tesseract
 
-
     @staticmethod
     def obtem_tesseract_output_type_image_data(valor_config_output_type_image_data):
 
         """
 
-            EXISTEM DUAS PRINCIPAIS FORMAS DE OUTPUT:
-                1) DATAFRAME
-                2) DICT
+        EXISTEM DUAS PRINCIPAIS FORMAS DE OUTPUT:
+            1) DATAFRAME
+            2) DICT
 
         """
 
-        # INICIANDO O VALIDADOR
-        validador = False
+        # INICIANDO O validator
+        validator = False
 
         # INICIANDO A VARIÁVEL DE OUTPUT DO IMAGE DATA
         valor_output_type_image_data = pytesseract.Output.DATAFRAME
@@ -227,26 +227,25 @@ class ocr_functions():
             else:
                 valor_output_type_image_data = pytesseract.Output.DATAFRAME
 
-                validador = True
+                validator = True
 
         except Exception as ex:
             print("ERRO NA FUNÇÃO: {} - {}".format(stack()[0][3], ex))
 
         return valor_output_type_image_data
 
-
-    def obtem_orientacao_imagem(self, caminho_imagem_atual = None):
+    def obtem_orientacao_imagem(self, caminho_imagem_atual=None):
 
         """
 
-            DETECTA E RETORNA A ORIENTAÇÃO DA IMAGEM.
+        DETECTA E RETORNA A ORIENTAÇÃO DA IMAGEM.
 
 
-            # Arguments
-                caminho_imagem_atual        - Required : Caminho da imagem atual (String)
-            # Returns
-                validador                   - Required : Validador de execução da função (Boolean)
-                valor_orientacao            - Required : Propriedades de orientação da imagem (String)
+        # Arguments
+            caminho_imagem_atual        - Required : Caminho da imagem atual (String)
+        # Returns
+            validator                   - Required : validator de execução da função (Boolean)
+            valor_orientacao            - Required : Propriedades de orientação da imagem (String)
 
         """
 
@@ -258,8 +257,8 @@ class ocr_functions():
             Script confidence
         """
 
-        # INICIANDO O VALIDADOR
-        validador = False
+        # INICIANDO O validator
+        validator = False
 
         # INICIANDO A VARIÁVEL QUE ARMAZENARÁ A ORIENTAÇÃO
         valor_orientacao = {}
@@ -274,74 +273,72 @@ class ocr_functions():
             imagem_atual = orchestra_read_image(caminho_imagem_atual)
 
             valor_orientacao = pytesseract.image_to_osd(imagem_atual)
-            validador = True
+            validator = True
 
         except Exception as ex:
             print("NÃO FOI POSSÍVEL DETECTAR A ORIENTAÇÃO DA PÁGINA")
             print("ERRO NA FUNÇÃO: {} - {}".format(stack()[0][3], ex))
 
-        return validador, valor_orientacao
-
+        return validator, valor_orientacao
 
     def set_config_tesseract(self):
 
         """
 
-            OBTÉM AS INFORMAÇÕES DA IMAGEM APÓS APLICAÇÃO DO OCR.
-            ESSA FUNÇÃO TRAZ TODAS AS INFORMAÇÕES CONTIDAS NO TEXTO ABAIXO.
-            POSIÇÕES DOS TEXTOS ENCONTRATOS, NÍVEL DE CONFIANÇA E TEXTOS.
+        OBTÉM AS INFORMAÇÕES DA IMAGEM APÓS APLICAÇÃO DO OCR.
+        ESSA FUNÇÃO TRAZ TODAS AS INFORMAÇÕES CONTIDAS NO TEXTO ABAIXO.
+        POSIÇÕES DOS TEXTOS ENCONTRATOS, NÍVEL DE CONFIANÇA E TEXTOS.
 
 
-            # Arguments
-                imagem_rgb                  - Required : Imagem para aplicação do ocr (Object)
-            # Returns
-                validador                   - Required : Validador de execução da função (Boolean)
-                infos_ocr                   - Required : Informações obtidas no OCR (Dict)
+        # Arguments
+            imagem_rgb                  - Required : Imagem para aplicação do ocr (Object)
+        # Returns
+            validator                   - Required : validator de execução da função (Boolean)
+            infos_ocr                   - Required : Informações obtidas no OCR (Dict)
 
         """
 
-        # INICIANDO O VALIDADOR
-        validador = False
+        # INICIANDO O validator
+        validator = False
 
         try:
             # VERIFICANDO SE A LINGUAGEM SELECIONADA, ESTÁ DISPONÍVEL
             if self.lang_padrao not in ocr_functions.tesseract_lang_disponiveis(self):
                 # COMO A LINGUAGEM SELECIONADA NÃO ESTÁ DISPONÍVEL
                 # UTILIZAREMOS A VERSÃO ENGLISH
-                self.lang_padrao = 'eng'
+                self.lang_padrao = "eng"
 
             # VERIFICANDO A CONFIGURAÇÃO PSM - OEM
-            self.config_tesseract_psm_oem = ocr_functions.obtem_tesseract_psm_oem(self.config_tesseract_psm,
-                                                                                  self.config_tesseract_oem)
+            self.config_tesseract_psm_oem = ocr_functions.obtem_tesseract_psm_oem(
+                self.config_tesseract_psm, self.config_tesseract_oem
+            )
 
-
-            validador = True
+            validator = True
 
         except Exception as ex:
             print("ERRO NA FUNÇÃO: {} - {}".format(stack()[0][3], ex))
 
-        return validador
-
+        return validator
 
     @staticmethod
     def convert_resultado_ocr_completo(input_result_ocr):
 
         """
 
-            APÓS A REALIZAÇÃO DO OCR COMPLETO (POR BOUNDING BOX),
-            ESSA FUNÇÃO CONCATENA O TEXTO, RESULTANDO EM UMA ÚNICA STRING.
+        APÓS A REALIZAÇÃO DO OCR COMPLETO (POR BOUNDING BOX),
+        ESSA FUNÇÃO CONCATENA O TEXTO, RESULTANDO EM UMA ÚNICA STRING.
 
-            CONVERTE O RESULTADO DO OCR COMPLETO (IMAGE DATA)
-            EM UM FORMATO LEGÍVEL:
-                1) TEXT: STRING CONTENDO O TEXTO DO OCR OBTIDO
-                2) INFOS_OCR: DATAFRAME CONTENDO AS INFORMAÇÕES DO OCR (IMAGE_DATA)
+        CONVERTE O RESULTADO DO OCR COMPLETO (IMAGE DATA)
+        EM UM FORMATO LEGÍVEL:
+            1) TEXT: STRING CONTENDO O TEXTO DO OCR OBTIDO
+            2) INFOS_OCR: DATAFRAME CONTENDO AS INFORMAÇÕES DO OCR (IMAGE_DATA)
 
-            # Arguments
-                input_result_ocr              - Required : Informações obtidas no OCR (DataFrame | Dict)
-            # Returns
-                list_result                   - Required : Texto resultante (List)
-                text_result                   - Required : Texto resultante (String)
-                infos_ocr                     - Required : Informações obtidas no OCR (DataFrame)
+        # Arguments
+            input_result_ocr              - Required : Informações obtidas no OCR (DataFrame | Dict)
+        # Returns
+            list_result                   - Required : Texto resultante (List)
+            text_result                   - Required : Texto resultante (String)
+            infos_ocr                     - Required : Informações obtidas no OCR (DataFrame)
 
         """
 
@@ -377,7 +374,6 @@ class ocr_functions():
                 list_result.append(str(string_atual).strip())
                 string_atual = ""
 
-
         if list_result:
             # FORMATANDO PARA RESULTADO EM FORMATO TEXTO
             text_result = "\n".join(list_result)
@@ -391,19 +387,18 @@ class ocr_functions():
         # DATAFRAME COMPLETO CONTENDO AS INFORMAÇÕES DO OCR
         return list_result, text_result, infos_ocr
 
-
     def visualiza_bounding_box_ocr_completo(self, image, info_ocr):
 
         """
 
-            FUNÇÃO PARA VISUALIZAR OS BOUNDING BOX E TEXTOS OBTIDOS
-            APÓS A APLICAÇÃO DO OCR COMPLETO(image_to_data).
+        FUNÇÃO PARA VISUALIZAR OS BOUNDING BOX E TEXTOS OBTIDOS
+        APÓS A APLICAÇÃO DO OCR COMPLETO(image_to_data).
 
-            # Arguments
-                imagem_                   - Required : Imagem para visualização do ocr (Object)
-                info_ocr                  - Required : Informações obtidas no OCR (Dict | DataFrame)
+        # Arguments
+            imagem_                   - Required : Imagem para visualização do ocr (Object)
+            info_ocr                  - Required : Informações obtidas no OCR (Dict | DataFrame)
 
-            # Returns
+        # Returns
 
         """
 
@@ -415,38 +410,42 @@ class ocr_functions():
             for i in range(len(info_ocr["text"])):
 
                 # DEFININDO A FONTE A SER UTILIZADA
-                fonte = 'UTILS/FONTS/calibri.ttf'
+                fonte = "UTILS/FONTS/calibri.ttf"
 
                 # REALIZANDO A CRIAÇÃO DA CAIXA DE TEXTO SOBRE O TEXTO
-                x, y, img_copy = image_view_functions.create_bounding_box(img=img_copy, bounding_positions=info_ocr.iloc[i])
+                x, y, img_copy = image_view_functions.create_bounding_box(
+                    img=img_copy, bounding_positions=info_ocr.iloc[i]
+                )
 
                 # INSERINDO O TEXTO SOBRE A CAIXA RETANGULAR (TOP - 10)
-                img_copy = image_view_functions.put_text_image(img=img_copy,
-                                                               text=info_ocr['text'][i],
-                                                               x_position=x+20, y_position=y+20,
-                                                               font=fonte)
+                img_copy = image_view_functions.put_text_image(
+                    img=img_copy,
+                    text=info_ocr["text"][i],
+                    x_position=x + 20,
+                    y_position=y + 20,
+                    font=fonte,
+                )
 
             image_view_functions.view_image(img_copy)
 
         except Exception as ex:
             print(ex)
 
-
     def realizar_ocr_retorno_completo(self, image):
 
         """
 
-            OBTÉM AS INFORMAÇÕES DA IMAGEM APÓS APLICAÇÃO DO OCR.
-            ESSA FUNÇÃO TRAZ TODAS AS INFORMAÇÕES CONTIDAS NO TEXTO ABAIXO.
-            POSIÇÕES DOS TEXTOS ENCONTRATOS, NÍVEL DE CONFIANÇA E TEXTOS.
+        OBTÉM AS INFORMAÇÕES DA IMAGEM APÓS APLICAÇÃO DO OCR.
+        ESSA FUNÇÃO TRAZ TODAS AS INFORMAÇÕES CONTIDAS NO TEXTO ABAIXO.
+        POSIÇÕES DOS TEXTOS ENCONTRATOS, NÍVEL DE CONFIANÇA E TEXTOS.
 
 
-            # Arguments
-                image                       - Required : Imagem para aplicação do ocr (Object)
+        # Arguments
+            image                       - Required : Imagem para aplicação do ocr (Object)
 
-            # Returns
-                validador                   - Required : Validador de execução da função (Boolean)
-                infos_ocr                   - Required : Informações obtidas no OCR (Dict | DataFrame)
+        # Returns
+            validator                   - Required : validator de execução da função (Boolean)
+            infos_ocr                   - Required : Informações obtidas no OCR (Dict | DataFrame)
 
         """
 
@@ -483,124 +482,133 @@ class ocr_functions():
 
         - word_num = numero da palavra (indice) dentro do bloco atual"""
 
-        # INICIANDO O VALIDADOR
-        validador = False
+        # INICIANDO O validator
+        validator = False
 
         # INICIANDO A VARIÁVEL INFORMAÇÕES DE OCR
         infos_ocr = {}
 
         # OBTENDO A CONFIG DE FORMATO DO OUTPUT
-        self.OUTPUT_TYPE_IMAGE_DATA = ocr_functions.obtem_tesseract_output_type_image_data(self.OUTPUT_TYPE_IMAGE_DATA)
+        self.OUTPUT_TYPE_IMAGE_DATA = (
+            ocr_functions.obtem_tesseract_output_type_image_data(
+                self.OUTPUT_TYPE_IMAGE_DATA
+            )
+        )
 
         try:
             # REALIZANDO O OCR SOBRE A IMAGEM
-            infos_ocr = pytesseract.image_to_data(image,
-                                                  lang=self.lang_padrao,
-                                                  config=self.config_tesseract_psm,
-                                                  output_type=self.OUTPUT_TYPE_IMAGE_DATA)
+            infos_ocr = pytesseract.image_to_data(
+                image,
+                lang=self.lang_padrao,
+                config=self.config_tesseract_psm,
+                output_type=self.OUTPUT_TYPE_IMAGE_DATA,
+            )
 
-            validador = True
+            validator = True
 
         except Exception as ex:
             print("ERRO NA FUNÇÃO: {} - {}".format(stack()[0][3], ex))
 
-        return validador, infos_ocr
-
+        return validator, infos_ocr
 
     def realizar_ocr(self, image):
 
         """
-            REALIZA A APLICAÇÃO DE OCR SOBRE UMA IMAGEM.
-            O OCR PERMITIRÁ TRANSCREVER A IMAGEM.
-            CONVERSÃO IMAGEM PARA TEXTO.
+        REALIZA A APLICAÇÃO DE OCR SOBRE UMA IMAGEM.
+        O OCR PERMITIRÁ TRANSCREVER A IMAGEM.
+        CONVERSÃO IMAGEM PARA TEXTO.
 
-            # Arguments
-                image                       - Required : Imagem para aplicação do ocr (Object)
+        # Arguments
+            image                       - Required : Imagem para aplicação do ocr (Object)
 
-            # Returns
-                validador                   - Required : Validador de execução da função (Boolean)
-                texto                       - Required : Texto obtido (String)
+        # Returns
+            validator                   - Required : validator de execução da função (Boolean)
+            texto                       - Required : Texto obtido (String)
         """
 
-        # INICIANDO O VALIDADOR
-        validador = False
+        # INICIANDO O validator
+        validator = False
 
         # INICIANDO A VARIÁVEL TEXTO
         texto = ""
 
         try:
             # REALIZANDO O OCR SOBRE A IMAGEM
-            texto = pytesseract.image_to_string(image,
-                                                lang=self.lang_padrao,
-                                                config=self.config_tesseract_psm)
+            texto = pytesseract.image_to_string(
+                image, lang=self.lang_padrao, config=self.config_tesseract_psm
+            )
 
-            validador = True
-
+            validator = True
 
         except Exception as ex:
             print("ERRO NA FUNÇÃO: {} - {}".format(stack()[0][3], ex))
 
-        return validador, texto
-
+        return validator, texto
 
     def orquestra_tipo_leitura_ocr(self, imagem_rgb):
 
         """
 
-            ORQUESTRA A APLICAÇÃO DE OCR SOBRE UMA IMAGEM.
-            SELECIONA QUAL FUNÇÃO SERÁ UTILIZADA.
-            UMA OPÇÃO RETORNARÁ APENAS O RESULTADO TEXTUAL DO OCR.
-            OUTRA OPÇÃO RETORNARÁ TODAS AS INFORMAÇÕES DO OCR.
+        ORQUESTRA A APLICAÇÃO DE OCR SOBRE UMA IMAGEM.
+        SELECIONA QUAL FUNÇÃO SERÁ UTILIZADA.
+        UMA OPÇÃO RETORNARÁ APENAS O RESULTADO TEXTUAL DO OCR.
+        OUTRA OPÇÃO RETORNARÁ TODAS AS INFORMAÇÕES DO OCR.
 
 
-            # Arguments
-                imagem_rgb                  - Required : Imagem para aplicação do ocr (Object)
+        # Arguments
+            imagem_rgb                  - Required : Imagem para aplicação do ocr (Object)
 
-            # Returns
-                validador                   - Required : Validador de execução da função (Boolean)
-                retorno_ocr                 - Required : Retorno do OCR (String | Dict)
+        # Returns
+            validator                   - Required : validator de execução da função (Boolean)
+            retorno_ocr                 - Required : Retorno do OCR (String | Dict)
 
         """
 
         # INICIANDO AS VARIÁVEIS DE RETORNO
-        validador = False
+        validator = False
         retorno_ocr = None
 
         if self.tipo_retorno_ocr == self.lista_tipos_retorno_ocr[0]:
             # O RETORNO SERÁ APENAS O TEXTUAL
-            validador, retorno_ocr = ocr_functions.realizar_ocr(self, imagem_rgb)
+            validator, retorno_ocr = ocr_functions.realizar_ocr(self, imagem_rgb)
 
         elif self.tipo_retorno_ocr == self.lista_tipos_retorno_ocr[1]:
             # O RETORNO SERÁ UM DICT CONTENDO TODAS AS INFORMAÇÕES
-            validador, retorno_ocr = ocr_functions.realizar_ocr_retorno_completo(self, imagem_rgb)
+            validator, retorno_ocr = ocr_functions.realizar_ocr_retorno_completo(
+                self, imagem_rgb
+            )
 
         else:
             print("NÃO FOI INFORMADA NENHUMA OPÇÃO VÁLIDA DE RETORNO DO OCR")
 
-        return validador, retorno_ocr
-
+        return validator, retorno_ocr
 
     def Orquestra_OCR(self, image):
 
-        # INICIANDO O VALIDADOR
-        validador = False
+        # INICIANDO O validator
+        validator = False
 
         # OBTENDO A ORIENTAÇÃO DA IMAGEM
-        # validador, resultado_orientacao = ocr_functions.obtem_orientacao_imagem(self, image)
+        # validator, resultado_orientacao = ocr_functions.obtem_orientacao_imagem(self, image)
 
         # REALIZANDO A LEITURA DA IMAGEM
         img_ocr = orchestra_read_image(image)
 
         # DEFININDO AS CONFIGURAÇÕES DO OCR - TESSERACT
-        validador = ocr_functions.set_config_tesseract(self)
+        validator = ocr_functions.set_config_tesseract(self)
 
-        validador, retorno_ocr = ocr_functions.orquestra_tipo_leitura_ocr(self, img_ocr)
+        validator, retorno_ocr = ocr_functions.orquestra_tipo_leitura_ocr(self, img_ocr)
 
-        if validador and self.tipo_retorno_ocr == "COMPLETO" and self.visualiza_ocr_completo:
-            ocr_functions.visualiza_bounding_box_ocr_completo(self, image=img_ocr, info_ocr=retorno_ocr)
+        if (
+            validator
+            and self.tipo_retorno_ocr == "COMPLETO"
+            and self.visualiza_ocr_completo
+        ):
+            ocr_functions.visualiza_bounding_box_ocr_completo(
+                self, image=img_ocr, info_ocr=retorno_ocr
+            )
 
-        if validador is False:
+        if validator is False:
             print("NÃO FOI POSSÍVEL APLICAR O OCR")
 
         return retorno_ocr
-
