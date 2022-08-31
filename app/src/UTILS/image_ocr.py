@@ -23,9 +23,10 @@ from dynaconf import settings
 import pandas as pd
 import pytesseract
 
-from src.UTILS.generic_functions import converte_int
-from src.UTILS.image_view import image_view_functions
-from src.UTILS.image_convert_format import orchestra_read_image
+from app.src.UTILS.generic_functions import converte_int
+from app.src.UTILS.image_view import image_view_functions
+from app.src.UTILS.image_convert_format import orchestra_read_image
+from app import execute_log
 
 
 class ocr_functions:
@@ -609,6 +610,8 @@ class ocr_functions:
             )
 
         if validator is False:
-            print("NÃO FOI POSSÍVEL APLICAR O OCR")
+            execute_log.error("NÃO FOI POSSÍVEL APLICAR O OCR")
+        else:
+            execute_log.info("OCR EXECUTADO COM SUCESSO")
 
         return retorno_ocr

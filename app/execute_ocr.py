@@ -82,7 +82,11 @@ class Execute_OCR:
         try:
             for idx, value in enumerate(result_tables):
                 dict_result["IMAGE_ORIGINAL"] = value["image_file"]
-                dict_result["TABLE_{}".format(str(idx))] = value["table"]
+
+                # VERIFICANDO SE A TABELA FOI OBTIDA
+                if value["table"] != None:
+                    dict_result["TABLE_{}".format(str(idx))] = value["table"]
+
         except Exception as ex:
             execute_log.error("ERRO NA FUNÇÃO: {} - {}".format(stack()[0][3], ex))
 

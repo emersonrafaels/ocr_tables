@@ -89,6 +89,9 @@ class Execute_Process_Tabela_Faturamento:
             pattern=settings.PATTERN_ONLY_LETTERS, string=str(value_table), repl=""
         ).strip()
 
+        if len(value_table_letters.split(" ")) > 10:
+            return False
+
         # REALIZANDO COMBINÇÃO DE PALAVRAS
         combinations = list(
             all_combinations(
