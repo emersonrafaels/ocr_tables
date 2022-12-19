@@ -30,11 +30,13 @@ try:
     from app.src.CONFIG import config
     from app.execute_extract_table import Extract_Table
     from app.execute_ocr import Execute_OCR
+    from app.src.UTILS.image_read import read_image_gray
     from app import execute_log
 except ModuleNotFoundError:
     sys.path.append(path.join(str(Path(__file__).resolve().parent.parent), "app"))
     from app.src.CONFIG import config
     from app.execute_extract_table import Extract_Table
+    from app.src.UTILS.image_read import read_image_gray
     from app.execute_ocr import Execute_OCR
     from app import execute_log
 
@@ -46,7 +48,7 @@ def orchestra_extract_table_ocr(files: bytes = None):
     execute_log.startLog()
 
     # INICIANDO AS VARIÁVEIS QUE ARMAZENARÃO OS RESULTADOS
-    result_ocr = ""
+    results = ""
     json_result = {}
 
     if files is not None:
@@ -56,6 +58,10 @@ def orchestra_extract_table_ocr(files: bytes = None):
 
             # EXECUTANDO A PIPELINE PARA BUSCA E EXTRAÇÃO DAS TABELAS
             results = Extract_Table().main_extract_table(files)
+
+        else:
+            results.append({"image_file": read_image_gray(Extract_Table().orchestra_get_files(files)[-1]),
+                            "table": None})
 
         # EXECUTANDO O OCR
         json_result = Execute_OCR().execute_pipeline_ocr(results)[0]
